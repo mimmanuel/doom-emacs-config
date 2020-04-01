@@ -1,7 +1,6 @@
 ;;; c:/Users/mnie/AppData/Local/DoomEmacs/.doom.d/+org.el -*- lexical-binding: t; -*-
 
 (after! org
-
   (setq org-log-done 'time)
   (setq org-log-into-drawer t)
   (setq org-indent-mode t)
@@ -10,6 +9,7 @@
   (setq org-todo-keywords
        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
          (sequence "WAITING(w!)" "|")
+         (sequence "|" "CANCELLED(C!)")
          (sequence "ACTIVE(a)" "ON-HOLD(h@!)" "|" "COMPLETED(c!)"))
       )
 
@@ -58,6 +58,10 @@
 
   (add-hook 'org-agenda-mode-hook #'org-super-agenda-mode)
   (setq org-super-agenda-header-map (make-sparse-keymap))
+
+  (setq org-agenda-start-on-weekday nil
+        org-agenda-span 10
+        org-agenda-start-day "0d")
 
   (setq org-agenda-custom-commands
       '(("n" "Agenda"
@@ -113,7 +117,7 @@
           ))
         ("rw" "Weekly Review"
          (
-          (agenda "" ((org-agenda-overriding-header "Next Week") (org-agenda-span 7)))
+          (agenda "" ((org-agenda-overriding-header "Next Week") (org-agenda-span 7) (org-agenda-start-on-weekday nil)))
           (tags "+project" ((org-agenda-overriding-header "Project List")
                             (org-super-agenda-groups '((:auto-todo t)))))
           )
