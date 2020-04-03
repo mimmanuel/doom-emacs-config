@@ -1,17 +1,16 @@
 ;;; c:/Users/mnie/AppData/Local/DoomEmacs/.doom.d/+org.el -*- lexical-binding: t; -*-
 
 (after! org
-  (setq org-log-done 'time)
-  (setq org-log-into-drawer t)
-  (setq org-indent-mode t)
+  (setq org-log-done 'time
+        org-log-into-drawer t
+        org-startup-folded nil)
 
   ;; Set org-todo-keywords
   (setq org-todo-keywords
        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
          (sequence "WAITING(w!)" "|")
          (sequence "|" "CANCELLED(C!)")
-         (sequence "ACTIVE(a)" "ON-HOLD(h@!)" "|" "COMPLETED(c!)"))
-      )
+         (sequence "ACTIVE(a)" "ON-HOLD(h@!)" "|" "COMPLETED(c!)")))
 
   (setq org-todo-keyword-faces
       '(("TODO" . org-todo)
