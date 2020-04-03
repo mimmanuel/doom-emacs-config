@@ -1,0 +1,27 @@
+#+TITLE: Doom emacs config
+#+STARTUP: folded
+
+* Server mode
+Start emacs in server mode
+#+begin_src emacs-lisp :tangle yes
+(server-start)
+#+end_src
+
+#+RESULTS:
+
+Add some bindings for server manipulation
+#+begin_src emacs-lisp :tangle yes :results silent
+(map!
+ :leader
+ :prefix ("S" . "server")
+ :desc "Start server" "s" 'server-start
+ :desc "Edit server" "e" 'server-edit
+ :desc "Delete server" "x" 'server-force-stop
+ )
+#+end_src
+
+#+RESULTS:
+: server-force-stop
+
+* Modes
+** org
