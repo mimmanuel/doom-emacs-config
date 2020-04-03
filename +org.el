@@ -48,20 +48,23 @@
                         ("project" . ?p)))
   ;; Setup org-agenda-files
   (setq org-agenda-files (list "~/org/gtd.org"))
-  ;;(setq org-agenda-file-regexp "*\.org$")
-
-  (setq org-agenda-window-setup 'current-window)
-
-  (setq org-use-tag-inheritance nil)
 
   (setq org-stuck-projects '("+PROJECT" ("TODO" "NEXT") nil ""))
 
-  (add-hook 'org-agenda-mode-hook #'org-super-agenda-mode)
+  (setq org-agenda-window-setup 'current-window)
+  (add-hook 'evil-org-agenda-mode-hook #'org-super-agenda-mode)
   (setq org-super-agenda-header-map (make-sparse-keymap))
 
   (setq org-agenda-start-on-weekday nil
         org-agenda-span 10
         org-agenda-start-day "0d")
+
+  ;; Speed up org-agenda
+  ;;
+  (setq org-agenda-inhibit-startup t
+        org-agenda-dim-blocked-tasks nil
+        org-use-tag-inheritance nil
+        org-agenda-use-tag-inheritance nil)
 
   (setq org-agenda-custom-commands
       '(("n" "Agenda"
