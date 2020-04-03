@@ -21,13 +21,10 @@
   (setq org-treat-S-cursor-todo-selection-as-state-change nil)
 
   (setq org-todo-state-tags-triggers
-        '(
-          ("ACTIVE" ("project" . t))
+        '(("ACTIVE" ("project" . t))
           ("ON-HOLD" ("project" . t))
           ("COMPLETED" ("project" . t))
-          (done ("urgent") ("important"))
-          )
-  )
+          (done ("urgent") ("important"))))
 
   ;; Setup org-capture-templates
   (setq org-capture-templates
@@ -37,8 +34,6 @@
          "* ACTIVE %? [%] :project:")
         ("i" "Tickler" entry (file+olp+datetree "~/org/tickler.org")
          "* %?")))
-
-
 
   (setq org-M-RET-may-split-line nil)
 
@@ -130,11 +125,6 @@
         )
       )
 
-  ;; (setq org-super-agenda-groups
-  ;;     '((:name "NEXT")
-  ;;     (:todo ("NEXT"))
-  ;;     ))
-  ;; Set org-refile-targets
   (setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
 
   (defun my--org-agenda-process ()
