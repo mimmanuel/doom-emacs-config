@@ -7,8 +7,6 @@ Start emacs in server mode
 (server-start)
 #+end_src
 
-#+RESULTS:
-
 Add some bindings for server manipulation
 #+begin_src emacs-lisp :tangle yes :results silent
 (map!
