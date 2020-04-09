@@ -20,8 +20,26 @@ Add some bindings for server manipulation
  )
 #+end_src
 
-#+RESULTS:
-: server-force-stop
+* OSX
+
+#+begin_src emacs-lisp :tangle yes :results silent
+(if (eq system-type 'darwin)
+  ; something for OS X if true
+  ; optional something if not
+    (setq mac-command-modifier 'meta
+          mac-option-modifier 'option)
+)
+#+end_src
+
+* Evil
+** Evil-org
+
+#+begin_src emacs-lisp :tangle yes :results silent
+(use-package! evil-org
+  :after org
+  :config
+  (evil-org-set-key-theme '(navigation insert textobjects return todo additional calendar)))
+#+end_src
 
 * Modes
 ** org
