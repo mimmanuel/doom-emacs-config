@@ -1,11 +1,66 @@
 #+TITLE: Doom emacs config
-#+STARTUP: folded
+#+STARTUP: overview
+* Doom
+#+begin_src emacs-lisp :tangle yes
+;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
+
+;; Place your private configuration here! Remember, you do not need to run 'doom
+;; sync' after modifying this file!
+
+
+;; Some functionality uses this to identify you, e.g. GPG configuration, email
+;; clients, file templates and snippets.
+(setq user-full-name "Mathias Nielsen"
+      user-mail-address "john@doe.com")
+
+;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
+;; are the three important ones:
+;;
+;; + `doom-font'
+;; + `doom-variable-pitch-font'
+;; + `doom-big-font' -- used for `doom-big-font-mode'; use this for
+;;   presentations or streaming.
+;;
+;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
+;; font string. You generally only need these two:
 (setq doom-font (font-spec :family "Hasklig" :size 14))
 (setq doom-variable-pitch-font (font-spec :family "Verdana" :size 12))
 
+;; There are two ways to load a theme. Both assume the theme is installed and
+;; available. You can either set `doom-theme' or manually load a theme with the
+;; `load-theme' function. This is the default:
+(setq doom-theme 'doom-palenight)
+
+;; If you use `org' and don't want your org files in the default location below,
+;; change `org-directory'. It must be set before org loads!
+(setq org-directory "~/org/")
+
+;; This determines the style of line numbers in effect. If set to `nil', line
+;; numbers are disabled. For relative line numbers, set this to `relative'.
+(setq display-line-numbers-type t)
+
+
+;; Here are some additional functions/macros that could help you configure Doom:
+;;
+;; - `load!' for loading external *.el files relative to this one
+;; - `use-package' for configuring packages
+;; - `after!' for running code after a package has loaded
+;; - `add-load-path!' for adding directories to the `load-path', relative to
+;;   this file. Emacs searches the `load-path' when you load packages with
+;;   `require' or `use-package'.
+;; - `map!' for binding new keys
+;;
+;; To get information about any of these functions/macros, move the cursor over
+;; the highlighted symbol at press 'K' (non-evil users must press 'C-c g k').
+;; This will open documentation for it, including demos of how they are used.
+;;
+;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
+;; they are implemented.
+
+#+end_src
 * Server mode
 Start emacs in server mode
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes :results silent
 (server-start)
 #+end_src
 
@@ -27,3 +82,37 @@ Add some bindings for server manipulation
 
 * Modes
 ** org
+#+begin_src emacs-lisp :tangle yes
+(load! "+org.el")
+#+end_src
+*** General Setup
+*** Capture Templates
+*** Agenda
+**** Agenda view icons
+Setup agenda view to only show category icon
+#+begin_src emacs-lisp :tangle yes
+(setq org-agenda-prefix-format '((agenda . " %-1i ?-12t% s")
+                                (todo . " %-1i ")
+                                (tags . " %-1i")
+                                (search . " %-1i")))
+#+end_src
+
+#+RESULTS:
+: ((agenda .  %-1i ?-12t% s) (todo .  %-1i ) (tags .  %-1i) (search .  %-1i))
+
+Add some icons
+#+begin_src emacs-lisp :tangle yes
+(setq org-agenda-category-icon-alist
+      `(("" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
+        ("Review" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
+        ("Reading" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
+        ("Development" ,(list (all-the-icons-material "computer")) nil nil :ascent center)
+        ("Planning" ,(list (all-the-icons-octicon "calendar")) nil nil :ascent center)))
+#+end_src
+
+#+RESULTS:
+|             | () | nil | nil | :ascent | center |
+| Review      | () | nil | nil | :ascent | center |
+| Reading     | () | nil | nil | :ascent | center |
+| Development | () | nil | nil | :ascent | center |
+| Planning    | () | nil | nil | :ascent | center |
