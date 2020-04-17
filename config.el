@@ -6,7 +6,7 @@
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
-(setq user-full-name "John Doe"
+(setq user-full-name "Mathias Nielsen"
       user-mail-address "john@doe.com")
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
@@ -19,7 +19,8 @@
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
-(setq doom-font (font-spec :family "Source Code Pro" :size 14))
+(setq doom-font (font-spec :family "Hasklig" :size 14))
+(setq doom-variable-pitch-font (font-spec :family "Verdana" :size 12))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -52,6 +53,26 @@
 ;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
 ;; they are implemented.
 
+(server-start)
 
+(map!
+ :leader
+ :prefix ("S" . "server")
+ :desc "Start server" "s" 'server-start
+ :desc "Edit server" "e" 'server-edit
+ :desc "Delete server" "x" 'server-force-stop
+ )
 
 (load! "+org.el")
+
+(setq org-agenda-prefix-format '((agenda . " %-1i ?-12t% s")
+                                (todo . " %-1i ")
+                                (tags . " %-1i")
+                                (search . " %-1i")))
+
+(setq org-agenda-category-icon-alist
+      `(("" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
+        ("Review" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
+        ("Reading" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
+        ("Development" ,(list (all-the-icons-material "computer")) nil nil :ascent center)
+        ("Planning" ,(list (all-the-icons-octicon "calendar")) nil nil :ascent center)))
