@@ -1,5 +1,7 @@
 #+TITLE: Doom emacs config
 #+STARTUP: folded
+(setq doom-font (font-spec :family "Hasklig" :size 14))
+(setq doom-variable-pitch-font (font-spec :family "Verdana" :size 12))
 
 * Server mode
 Start emacs in server mode
