@@ -100,7 +100,7 @@ Add some bindings for server manipulation
 * Modes
 ** org
 #+begin_src emacs-lisp :tangle yes
-(load! "+org.el")
+;;(load! "+org.el")
 #+end_src
 
 *** General Setup
