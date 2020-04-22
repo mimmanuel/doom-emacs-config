@@ -63,12 +63,84 @@
  :desc "Delete server" "x" 'server-force-stop
  )
 
+(if (eq system-type 'darwin)
+  ; something for OS X if true
+  ; optional something if not
+    (setq mac-command-modifier 'meta
+          mac-option-modifier 'option)
+)
+
+(use-package! evil-org
+  :after org
+  :config
+  (evil-org-set-key-theme '(navigation insert textobjects return todo additional calendar)))
+
 (load! "+org.el")
+
+(after! org
+  (setq org-log-done 'time
+        org-log-into-drawer t
+        org-startup-folded nil))
+
+(after! org
+  (setq org-todo-keywords
+      '((sequence "TODO(t)" "STARTED(s!)" "|" "DONE(d!)")
+        (sequence "WAITING(w!)" "|")
+        (sequence "|" "CANCELLED(C!)")
+        (sequence "ACTIVE(a)" "ON-HOLD(h@!)" "|" "COMPLETED(c!)")))
+
+(setq org-treat-S-cursor-todo-selection-as-state-change nil))
+
+(after! org
+  (setq org-todo-keyword-faces
+    '(("TODO" . (t (:inherit org-todo)))
+      ("STARTED" . (t (:inherit org-todo :foreground "green")))
+      (("COMPLETED" "DONE") . (t (:inherit org-done :strike-through t)))
+      ("ON-HOLD" . "orange"))))
+
+(setq org-priority-highest ?A
+      org-priority-lowest ?D
+      org-priority-default ?B)
+
+(after! org
+  (setq org-capture-templates
+        '(("t" "Todo" entry (file+headline "~/org/inbox.org" "Inbox")
+          "* TODO %?")
+          ("p" "Project" entry (file+headline "~/org/gtd.org" "Projects")
+          "* ACTIVE %? [%] :project:")
+          ("i" "Tickler" entry (file+olp+datetree "~/org/tickler.org")
+          "* %?"))))
+
+(setq org-agenda-files (list "~/org/gtd.org"))
+
+(setq org-stuck-projects '("+PROJECT" ("TODO" "NEXT") nil ""))
+
+(setq org-agenda-window-setup 'current-window)
+(add-hook 'evil-org-agenda-mode-hook #'org-super-agenda-mode)
+;;(setq org-super-agenda-header-map (make-sparse-keymap))
+
+(setq org-agenda-start-on-weekday nil
+      org-agenda-span 10
+      org-agenda-start-day "0d")
+
+;; Speed up org-agenda
+;;
+(setq org-agenda-inhibit-startup t
+      org-agenda-dim-blocked-tasks nil
+      org-use-tag-inheritance nil
+      org-agenda-use-tag-inheritance nil)
 
 (setq org-agenda-prefix-format '((agenda . " %-1i ?-12t% s")
                                 (todo . " %-1i ")
                                 (tags . " %-1i")
                                 (search . " %-1i")))
+
+(setq org-agenda-category-icon-alist
+      `(("" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
+        ("Review" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
+        ("Reading" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
+        ("Development" ,(list (all-the-icons-material "computer")) nil nil :ascent center)
+        ("Planning" ,(list (all-the-icons-octicon "calendar")) nil nil :ascent center)))
 
 (setq org-agenda-category-icon-alist
       `(("" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
