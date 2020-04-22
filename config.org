@@ -160,8 +160,6 @@ Set pritories ranging from A to D
 #+end_src
 *** Capture Templates
 *** Agenda
-**** Agenda view icons
-Setup agenda view to only show category icon
 **** General
 #+begin_src emacs-lisp :tangle yes
   (setq org-agenda-files (list "~/org/gtd.org"))
