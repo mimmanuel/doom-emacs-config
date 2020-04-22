@@ -164,11 +164,6 @@ Set pritories ranging from A to D
 Setup agenda view to only show category icon
 **** General
 #+begin_src emacs-lisp :tangle yes
-(setq org-agenda-prefix-format '((agenda . " %-1i ?-12t% s")
-                                (todo . " %-1i ")
-                                (tags . " %-1i")
-                                (search . " %-1i")))
-#+end_src
   (setq org-agenda-files (list "~/org/gtd.org"))
 
   (setq org-stuck-projects '("+PROJECT" ("TODO" "NEXT") nil ""))
@@ -190,7 +185,23 @@ Setup agenda view to only show category icon
 
 #+end_src
 **** Agenda view icons
+
 Setup agenda view to only show category icon
+
+#+begin_src emacs-lisp :tangle yes
+(setq org-agenda-prefix-format '((agenda . " %-1i ?-12t% s")
+                                (todo . " %-1i ")
+                                (tags . " %-1i")
+                                (search . " %-1i")))
+
+(setq org-agenda-category-icon-alist
+      `(("" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
+        ("Review" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
+        ("Reading" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
+        ("Development" ,(list (all-the-icons-material "computer")) nil nil :ascent center)
+        ("Planning" ,(list (all-the-icons-octicon "calendar")) nil nil :ascent center)))
+
+#+end_src
 * Getting Things Done
 ** Collection
 ** Tags
