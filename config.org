@@ -102,22 +102,101 @@ Add some bindings for server manipulation
 #+begin_src emacs-lisp :tangle yes
 (load! "+org.el")
 #+end_src
+
 *** General Setup
+**** Inital setup
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (setq org-log-done 'time
+        org-log-into-drawer t
+        org-startup-folded nil))
+#+end_src
+**** Todo-keywords
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (setq org-todo-keywords
+      '((sequence "TODO(t)" "STARTED(s!)" "|" "DONE(d!)")
+        (sequence "WAITING(w!)" "|")
+        (sequence "|" "CANCELLED(C!)")
+        (sequence "ACTIVE(a)" "ON-HOLD(h@!)" "|" "COMPLETED(c!)")))
+
+(setq org-treat-S-cursor-todo-selection-as-state-change nil))
+#+end_src
+
+Set todo keyword faces
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (setq org-todo-keyword-faces
+    '(("TODO" . (t (:inherit org-todo)))
+      ("STARTED" . (t (:inherit org-todo :foreground "green")))
+      (("COMPLETED" "DONE") . (t (:inherit org-done :strike-through t)))
+      ("ON-HOLD" . "orange"))))
+#+end_src
+
+**** Priorities
+Set pritories ranging from A to D
+
+| Priority | Description                         |
+| A        | Tasks that are urgent and important |
+| B        |                                     |
+| C        |                                     |
+| D        |                                     |
+
+#+begin_src emacs-lisp :tangle yes
+(setq org-priority-highest ?A
+      org-priority-lowest ?D
+      org-priority-default ?B)
+#+end_src
+**** Capture templates
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (setq org-capture-templates
+        '(("t" "Todo" entry (file+headline "~/org/inbox.org" "Inbox")
+          "* TODO %?")
+          ("p" "Project" entry (file+headline "~/org/gtd.org" "Projects")
+          "* ACTIVE %? [%] :project:")
+          ("i" "Tickler" entry (file+olp+datetree "~/org/tickler.org")
+          "* %?"))))
+#+end_src
 *** Capture Templates
 *** Agenda
 **** Agenda view icons
 Setup agenda view to only show category icon
+**** General
 #+begin_src emacs-lisp :tangle yes
 (setq org-agenda-prefix-format '((agenda . " %-1i ?-12t% s")
                                 (todo . " %-1i ")
                                 (tags . " %-1i")
                                 (search . " %-1i")))
 #+end_src
+  (setq org-agenda-files (list "~/org/gtd.org"))
 
-#+RESULTS:
-: ((agenda .  %-1i ?-12t% s) (todo .  %-1i ) (tags .  %-1i) (search .  %-1i))
+  (setq org-stuck-projects '("+PROJECT" ("TODO" "NEXT") nil ""))
 
-Add some icons
+  (setq org-agenda-window-setup 'current-window)
+  (add-hook 'evil-org-agenda-mode-hook #'org-super-agenda-mode)
+  ;;(setq org-super-agenda-header-map (make-sparse-keymap))
+
+  (setq org-agenda-start-on-weekday nil
+        org-agenda-span 10
+        org-agenda-start-day "0d")
+
+  ;; Speed up org-agenda
+  ;;
+  (setq org-agenda-inhibit-startup t
+        org-agenda-dim-blocked-tasks nil
+        org-use-tag-inheritance nil
+        org-agenda-use-tag-inheritance nil)
+
+#+end_src
+**** Agenda view icons
+Setup agenda view to only show category icon
+* Getting Things Done
+** Collection
+** Tags
+
+*** Contexts
+Contexts are implemented using tags, in org mode tags are defined in org-tag-alist
 #+begin_src emacs-lisp :tangle yes
 (setq org-agenda-category-icon-alist
       `(("" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
@@ -133,3 +212,7 @@ Add some icons
 | Reading     | () | nil | nil | :ascent | center |
 | Development | () | nil | nil | :ascent | center |
 | Planning    | () | nil | nil | :ascent | center |
+: ((important . 105) (urgent . 117) (:newline) (project . 112) (:startgroup) (@workpc . 119) (@labpc . 108) (:endgroup))
+** Daily Review
+** Weekly Review
+** Next Action
