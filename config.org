@@ -1,5 +1,6 @@
 #+TITLE: Doom emacs config
 #+STARTUP: overview
+#+PROPERTY: header-args :comment org :results silent
 * Doom
 #+begin_src emacs-lisp :tangle yes
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
