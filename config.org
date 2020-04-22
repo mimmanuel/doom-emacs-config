@@ -196,7 +196,9 @@ Set pritories ranging from A to D
 **** Super Agenda
 #+begin_src emacs-lisp :tangle yes
 (use-package! org-super-agenda
-  :after evil-org)
+  :after evil-org
+  :config
+  (add-hook 'evil-org-agenda-mode-hook #'org-super-agenda-mode))
 #+end_src
 **** Agenda view icons
 
