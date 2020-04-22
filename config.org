@@ -158,6 +158,16 @@ Set pritories ranging from A to D
           ("i" "Tickler" entry (file+olp+datetree "~/org/tickler.org")
           "* %?"))))
 #+end_src
+**** Tags
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (setq org-tag-alist '(("important" . ?i) ("urgent" . ?u)
+                        (:startgroup . nil)
+                        ("@localpc" . ?l) ("@devpc" . ?l) ("@rqm" . ?r)
+                        (:endgroup .nil)
+                        (:newline . nil)
+                        ("project" . ?p))))
+#+end_src
 *** Capture Templates
 *** Agenda
 **** General
