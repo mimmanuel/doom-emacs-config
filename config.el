@@ -25,7 +25,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-palenight)
+;;(setq doom-theme 'doom-palenight)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -53,7 +53,7 @@
 ;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
 ;; they are implemented.
 
-(server-start)
+;;(server-start)
 
 (map!
  :leader
@@ -70,17 +70,23 @@
           mac-option-modifier 'option)
 )
 
+(load-theme 'doom-palenight)
+
 (use-package! evil-org
   :after org
   :config
   (evil-org-set-key-theme '(navigation insert textobjects return todo additional calendar)))
 
-(load! "+org.el")
+;;(load! "+org.el")
 
 (after! org
   (setq org-log-done 'time
         org-log-into-drawer t
         org-startup-folded nil))
+
+(map!
+ :mode org
+ :n "RET" #'org-open-at-point)
 
 (after! org
   (setq org-todo-keywords
@@ -94,7 +100,7 @@
 (after! org
   (setq org-todo-keyword-faces
     '(("TODO" . (t (:inherit org-todo)))
-      ("STARTED" . (t (:inherit org-todo :foreground "green")))
+      ;;("STARTED" . (t (:inherit org-todo :foreground "green")))
       (("COMPLETED" "DONE") . (t (:inherit org-done :strike-through t)))
       ("ON-HOLD" . "orange"))))
 
@@ -111,12 +117,44 @@
           ("i" "Tickler" entry (file+olp+datetree "~/org/tickler.org")
           "* %?"))))
 
+(after! org
+  (setq org-tag-alist '(("important" . ?i) ("urgent" . ?u)
+                        (:startgroup . nil)
+                        ("@localpc" . ?l) ("@devpc" . ?l) ("@rqm" . ?r)
+                        (:endgroup .nil)
+                        (:newline . nil)
+                        ("project" . ?p))))
+
+(after! org
+  (let* ((variable-tuple
+        (cond ((x-list-fonts "Source Sans Pro") '(:font "Source Sans Pro"))
+              ((x-list-fonts "Lucida Grande")   '(:font "Lucida Grande"))
+              ((x-list-fonts "Verdana")         '(:font "Verdana"))
+              ((x-family-fonts "Sans Serif")    '(:family "Sans Serif"))
+              (nil (warn "Cannot find a Sans Serif Font.  Install Source Sans Pro."))))
+       (base-font-color     (face-foreground 'default nil 'default))
+       (headline           `(:inherit default :weight normal :foreground ,base-font-color)))
+
+  (custom-theme-set-faces
+   'user
+   `(org-level-8 ((t (,@headline))))
+   `(org-level-7 ((t (,@headline))))
+   `(org-level-6 ((t (,@headline))))
+   `(org-level-5 ((t (,@headline))))
+   `(org-level-4 ((t (,@headline :height 1.0))))
+   `(org-level-3 ((t (,@headline :height 1.0))))
+   `(org-level-2 ((t (,@headline :height 1.0))))
+   `(org-level-1 ((t (,@headline :height 1.2 :weight bold))))
+   `(org-document-title ((t (,@headline :height 1.5 :underline nil)))))))
+
+(use-package! org-superstar)
+
 (setq org-agenda-files (list "~/org/gtd.org"))
 
 (setq org-stuck-projects '("+PROJECT" ("TODO" "NEXT") nil ""))
 
 (setq org-agenda-window-setup 'current-window)
-(add-hook 'evil-org-agenda-mode-hook #'org-super-agenda-mode)
+;;(add-hook 'evil-org-agenda-mode-hook #'org-super-agenda-mode)
 ;;(setq org-super-agenda-header-map (make-sparse-keymap))
 
 (setq org-agenda-start-on-weekday nil
@@ -130,7 +168,33 @@
       org-use-tag-inheritance nil
       org-agenda-use-tag-inheritance nil)
 
-(setq org-agenda-prefix-format '((agenda . " %-1i ?-12t% s")
+(use-package! org-super-agenda
+  :after evil-org
+  :config
+  (add-hook 'evil-org-agenda-mode-hook #'org-super-agenda-mode))
+
+(use-package! org-ql
+  :after org
+  :config
+    (defvaralias 'org-lowest-priority 'org-priority-lowest)
+)
+
+(after! org
+  (setq org-agenda-custom-commands
+        '(("n" "Agenda"
+           ((org-ql-block '(todo "STARTED"))
+            (org-ql-block '(and (todo "TODO") (priority "A")))
+            (org-ql-block '(and (todo "TODO") (priority <= "B")))
+            ;;(todo "STARTED")
+            ;;(todo "TODO" ((org-agenda-overriding-header "Todo list")))
+            ))
+          ("r" . "Review")
+          ("rd" "Daily Review"
+           ((alltodo "" ((org-agenda-overriding-header "Inbox")
+                         (org-agenda-files (concat org-directory "inbox.org"))))))
+          )))
+
+(setq org-agenda-prefix-format '((agenda . " %-1i %?-12t% s")
                                 (todo . " %-1i ")
                                 (tags . " %-1i")
                                 (search . " %-1i")))
@@ -141,6 +205,10 @@
         ("Reading" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
         ("Development" ,(list (all-the-icons-material "computer")) nil nil :ascent center)
         ("Planning" ,(list (all-the-icons-octicon "calendar")) nil nil :ascent center)))
+
+(use-package! deft
+  :init
+  (setq deft-directory "~/.deft/"))
 
 (setq org-agenda-category-icon-alist
       `(("" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
