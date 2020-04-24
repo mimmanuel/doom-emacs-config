@@ -247,12 +247,40 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
   :config
   (add-hook 'evil-org-agenda-mode-hook #'org-super-agenda-mode))
 #+end_src
+
+**** org-ql
+#+begin_src emacs-lisp :tangle yes
+(use-package! org-ql
+  :after org
+  :config
+    (defvaralias 'org-lowest-priority 'org-priority-lowest)
+)
+#+end_src
+
+**** Custom Agenda Views
+#+BEGIN_SRC emacs-lisp :tangle yes
+(after! org
+  (setq org-agenda-custom-commands
+        '(("n" "Agenda"
+           ((org-ql-block '(todo "STARTED"))
+            (org-ql-block '(and (todo "TODO") (priority "A")))
+            (org-ql-block '(and (todo "TODO") (priority <= "B")))
+            ;;(todo "STARTED")
+            ;;(todo "TODO" ((org-agenda-overriding-header "Todo list")))
+            ))
+          ("r" . "Review")
+          ("rd" "Daily Review"
+           ((alltodo "" ((org-agenda-overriding-header "Inbox")
+                         (org-agenda-files (concat org-directory "inbox.org"))))))
+          )))
+#+END_SRC
+
 **** Agenda view icons
 
 Setup agenda view to only show category icon
 
-#+begin_src emacs-lisp :tangle yes
-(setq org-agenda-prefix-format '((agenda . " %-1i ?-12t% s")
+#+BEGIN_SRC emacs-lisp :tangle yes
+(setq org-agenda-prefix-format '((agenda . " %-1i %?-12t% s")
                                 (todo . " %-1i ")
                                 (tags . " %-1i")
                                 (search . " %-1i")))
