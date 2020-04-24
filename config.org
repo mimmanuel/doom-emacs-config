@@ -117,6 +117,12 @@ Add some bindings for server manipulation
         org-log-into-drawer t
         org-startup-folded nil))
 #+end_src
+**** Bindings :bindings:
+#+begin_src emacs-lisp :tangle yes
+(map!
+ :mode org
+ :n "RET" #'org-open-at-point)
+#+end_src
 **** Todo-keywords
 #+begin_src emacs-lisp :tangle yes
 (after! org
