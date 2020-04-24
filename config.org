@@ -134,7 +134,7 @@ Set todo keyword faces
 (after! org
   (setq org-todo-keyword-faces
     '(("TODO" . (t (:inherit org-todo)))
-      ("STARTED" . (t (:inherit org-todo :foreground "green")))
+      ;;("STARTED" . (t (:inherit org-todo :foreground "green")))
       (("COMPLETED" "DONE") . (t (:inherit org-done :strike-through t)))
       ("ON-HOLD" . "orange"))))
 #+end_src
