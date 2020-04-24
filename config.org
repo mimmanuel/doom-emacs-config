@@ -59,6 +59,11 @@
 ;; they are implemented.
 
 #+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(setq doom-localleader-key ","
+      doom-localleader-alt-key "M-,")
+#+end_src
 * Server mode
 Start emacs in server mode
 #+begin_src emacs-lisp :tangle yes :results silent
