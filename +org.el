@@ -46,8 +46,8 @@
   (setq org-stuck-projects '("+PROJECT" ("TODO" "NEXT") nil ""))
 
   (setq org-agenda-window-setup 'current-window)
-  (add-hook 'evil-org-agenda-mode-hook #'org-super-agenda-mode)
-  (setq org-super-agenda-header-map (make-sparse-keymap))
+  ;(add-hook 'evil-org-agenda-mode-hook #'org-super-agenda-mode)
+  ;;(setq org-super-agenda-header-map (make-sparse-keymap))
 
   (setq org-agenda-start-on-weekday nil
         org-agenda-span 10
