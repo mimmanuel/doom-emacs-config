@@ -292,7 +292,22 @@ Setup agenda view to only show category icon
         ("Development" ,(list (all-the-icons-material "computer")) nil nil :ascent center)
         ("Planning" ,(list (all-the-icons-octicon "calendar")) nil nil :ascent center)))
 
+#+END_SRC
+**** Custom links
+#+begin_src emacs-lisp :tangle no
+(after! org
+  (pushnew! org-link-abbrev-alist
+            '("rqm" . "https://clm.dgs.com/qm/web/console/System%20Verification%20for%20projects%20and%20products#action=com.ibm.rqm.planning.home.actionDispatcher&subAction=viewTestCase&id=%s")
+            '("jira" . "https://jira.kitenet.com/browse/%s"))
+  )
 #+end_src
+** deft
+#+begin_src emacs-lisp :tangle yes
+(use-package! deft
+  :init
+  (setq deft-directory "~/.deft/"))
+#+end_src
+
 * Getting Things Done
 ** Collection
 ** Tags
