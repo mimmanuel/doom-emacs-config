@@ -212,7 +212,7 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
    `(org-level-3 ((t (,@headline :height 1.0))))
    `(org-level-2 ((t (,@headline :height 1.0))))
    `(org-level-1 ((t (,@headline :height 1.2 :weight bold))))
-   `(org-document-title ((t (,@headline :height 1.5 :underline nil)))))))
+   `(org-document-title ((t (,@headline :height 1.5 :underline nil :weight bold)))))))
 #+end_src
 
 **** Org-bullets
