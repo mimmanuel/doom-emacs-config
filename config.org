@@ -302,6 +302,22 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
           )))
 #+END_SRC
 
+***** Next Actions list
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (add-to-list 'org-agenda-custom-commands
+               '("n" "Next Actions"
+                  ((agenda "" ((org-agenda-overriding-header "Today")
+                               (org-agenda-span 'day)))
+                   (todo "STARTED" ((org-agenda-overriding-header "On-going Tasks")))
+                   (tags-todo "+PRIORITY=\"A\"" ((org-agenda-overriding-header "High Priority")))
+                   (tags-todo "PRIORITY=\"B\"|PRIORITY=\"C\"" ((org-agenda-overriding-header "Medium Priority")
+                                                               (org-agenda-sorting-strategy '(priority-down)))))
+                  ((org-agenda-skip-function '(or (org-agenda-skip-entry-if 'todo '("WAITING"))
+                                                  (org-agenda-skip-subtree-if 'todo '("ON-HOLD"))
+                                                  (org-agenda-skip-entry-if 'regexp ":project:"))))))
+   )
+#+end_src
 **** Agenda view icons
 
 Setup agenda view to only show category icon
