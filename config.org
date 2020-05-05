@@ -93,7 +93,6 @@ Add some bindings for server manipulation
 #+end_src
 
 * UI
-
 ** Theme
 #+begin_src emacs-lisp :tangle yes
 (load-theme 'doom-palenight)
