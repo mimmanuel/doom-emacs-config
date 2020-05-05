@@ -319,6 +319,11 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
                                                   (org-agenda-skip-entry-if 'regexp ":project:"))))))
    )
 #+end_src
+***** Review
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (add-to-list 'org-agenda-custom-commands '("r" . "Review") t))
+#+end_src
 **** Agenda view icons
 
 Setup agenda view to only show category icon
