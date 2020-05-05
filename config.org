@@ -184,8 +184,11 @@ Set pritories ranging from A to D
 (after! org
   (setq org-capture-templates
         '(("t" "Todo" entry (file+headline "~/org/inbox.org" "Inbox")
-          "* TODO %?")
-          ("p" "Project" entry (file+headline "~/org/gtd.org" "Projects")
+           "* TODO %?")
+          ("u" "Urgent Todo" entry (file+headline "~/org/gtd.org" "Misc")
+           "* TODO [#A] %?"
+           :jump-to-captured t)
+          ("p" "Project" entry (file+headline "~/org/gtd.org" "Misc")
           "* ACTIVE %? [%] :project:")
           ("i" "Tickler" entry (file+olp+datetree "~/org/tickler.org")
           "* %?"))))
