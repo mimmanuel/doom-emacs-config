@@ -281,7 +281,11 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
 #+end_src
 
 **** Custom Agenda Views
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
+(after! org
+  (setq org-agenda-custom-commands nil))
+#+end_src
+
 (after! org
   (setq org-agenda-custom-commands
         '(("n" "Agenda"
