@@ -120,7 +120,7 @@ Add some bindings for server manipulation
 (add-to-list 'auto-mode-alist '("\\.out$" . text-mode))
 #+end_src
 
-** org
+** org :org:
 #+begin_src emacs-lisp :tangle yes
 ;;(load! "+org.el")
 #+end_src
