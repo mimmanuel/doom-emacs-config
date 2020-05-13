@@ -113,13 +113,27 @@ Add some bindings for server manipulation
 #+end_src
 
 * Modes
+** nxml
+#+begin_src emacs-lisp :tangle yes
+(use-package! nxml
+  :defer t
+  :mode ("\\.xml$" . nxml-mode)
+  :init
+  (setq nxml-auto-insert-xml-declaration-flag nil)
+  :config
+  (set-file-template! 'nxml-mode)
+  )
+
+(after! org
+  (pushnew! +org-babel-mode-alist '(xml . nxml)))
+#+end_src
+
 ** Misc
 *** open .err-files as text-mode
 #+begin_src emacs-lisp :tangle yes
 (add-to-list 'auto-mode-alist '("\\.err$" . text-mode))
 (add-to-list 'auto-mode-alist '("\\.out$" . text-mode))
 #+end_src
-
 ** org :org:
 #+begin_src emacs-lisp :tangle yes
 ;;(load! "+org.el")
