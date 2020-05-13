@@ -135,8 +135,8 @@ Add some bindings for server manipulation
 #+end_src
 **** Bindings :bindings:
 #+begin_src emacs-lisp :tangle yes
-(after! evil-org
   (map!
+   :after evil-org
    :map evil-org-mode-map
    ;; Map RET to open-at-point
    :n "RET" #'org-open-at-point
@@ -145,7 +145,6 @@ Add some bindings for server manipulation
    :n "K" #'org-previous-visible-heading
    :n "L" #'org-show-subtree
    :n "H" #'org-cycle)
-  )
 #+end_src
 **** Todo-keywords
 #+begin_src emacs-lisp :tangle yes
