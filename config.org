@@ -93,10 +93,15 @@ Add some bindings for server manipulation
 #+end_src
 
 * UI
+** Default Frame size
+#+begin_src emacs-lisp :tangle yes
+(pushnew! default-frame-alist '(height . 40) '(width . 128))
+#+end_src
 ** Theme
 #+begin_src emacs-lisp :tangle yes
 (load-theme 'doom-palenight)
 #+end_src
+
 * Evil
 ** Evil-org
 
