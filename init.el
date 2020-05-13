@@ -181,3 +181,7 @@
        :config
        ;;literate
        (default +bindings +smartparens)
+
+       :personal
+       p4
+       matlab)
