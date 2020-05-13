@@ -207,9 +207,9 @@ Set pritories ranging from A to D
 **** Tags
 #+begin_src emacs-lisp :tangle yes
 (after! org
-  (setq org-tag-alist '(("important" . ?i) ("urgent" . ?u)
+  (setq org-tag-alist '(
                         (:startgroup . nil)
-                        ("@localpc" . ?l) ("@devpc" . ?l) ("@rqm" . ?r)
+                        ("@localpc" . ?l) ("@devpc" . ?d) ("@rqm" . ?r)
                         (:endgroup .nil)
                         (:newline . nil)
                         ("project" . ?p))))
