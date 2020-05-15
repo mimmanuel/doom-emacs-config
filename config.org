@@ -392,8 +392,8 @@ Setup agenda view to only show category icon
 #+BEGIN_SRC emacs-lisp :tangle yes
 (after! org
   (setq org-agenda-prefix-format '((agenda . " %-1i %?-12t% s")
-                                (todo . " %-1i %?(org-entry-get nil \"StoryPoints\") ")
-                                (tags . " %-1i %?(org-entry-get nil \"StoryPoints\") ")
+                                (todo . " %-1i ")
+                                (tags . " %-1i ")
                                 (search . " %-1i ")))
 
   (setq org-agenda-category-icon-alist
