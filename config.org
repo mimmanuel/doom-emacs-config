@@ -101,8 +101,14 @@ Add some bindings for server manipulation
 #+begin_src emacs-lisp :tangle yes
 (load-theme 'doom-palenight)
 #+end_src
-
 * Evil
+** Evil
+#+begin_src emacs-lisp :tangle yes
+(map!
+ :after evil
+ :n "TAB" #'evil-toggle-fold)
+#+end_src
+
 ** Evil-org
 
 #+begin_src emacs-lisp :tangle yes :results silent
