@@ -81,6 +81,11 @@ Add some bindings for server manipulation
  )
 #+end_src
 
+Add hook to create new frame
+
+#+begin_src emacs-lisp :tangle yes
+(remove-hook 'server-visit-hook #'make-frame)
+#+end_src
 * OSX
 
 #+begin_src emacs-lisp :tangle yes :results silent
