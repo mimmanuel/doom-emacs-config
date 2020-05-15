@@ -388,13 +388,14 @@ Setup agenda view to only show category icon
                                 (search . " %-1i ")))
 
   (setq org-agenda-category-icon-alist
-      `(("" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
+      `(
         ("Review" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
         ("Reading" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
         ("Development" ,(list (all-the-icons-material "computer")) nil nil :ascent center)
         ("Planning" ,(list (all-the-icons-octicon "calendar")) nil nil :ascent center)
         ("Personal" ,(list (all-the-icons-material "person")) nil nil :ascent center)
-        ("Misc" ,(list (all-the-icons-octicon "checklist")) nil nil :ascent center)))
+        ("Misc" ,(list (all-the-icons-octicon "checklist")) nil nil :ascent center)
+        ("" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)))
 )
 #+END_SRC
 **** Custom links
