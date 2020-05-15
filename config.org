@@ -370,18 +370,10 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
   (add-to-list 'org-agenda-custom-commands
                '("rd" "Daily Review"
                  ((todo "" ((org-agenda-overriding-header "Inbox")
-                            (org-agenda-files (expand-file-name "inbox.org" org-directory))))
+                            (org-agenda-files '((expand-file-name "inbox.org" org-directory)))))
                   (tags-todo "EFFORT=\{\}" ((org-agenda-overriding-header "Process")))))))
 #+end_src
 ****** Weekly Review
-[[https://gettingthingsdone.com/2018/08/episode-43-the-power-of-the-gtd-weekly-review/][The 11 steps of the weekly review]]
-1) Get Clear
-   1) Collect everything
-   2) Get "IN" to ZERO
-   3) Empty Your head
-2) Get Current
-   1) Review Next Actions List
-3) Get Creative
 
 
 **** Agenda view icons
