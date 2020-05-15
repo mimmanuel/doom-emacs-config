@@ -334,17 +334,21 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
   (setq org-agenda-custom-commands nil))
 #+end_src
 
+#+begin_src emacs-lisp :tangle yes
+(defmacro +mnie/add-org-agenda-custom-commands (command)
+  `(after! org (add-to-list 'org-agenda-custom-commands ,command)))
+#+end_src
 ***** Next Actions list :gtd:
 #+begin_src emacs-lisp :tangle yes
-(after! org
-  (add-to-list 'org-agenda-custom-commands
+(+mnie/add-org-agenda-custom-commands
                '("n" "Next Actions"
                   ((agenda "" ((org-agenda-overriding-header "Today")
                                (org-agenda-span 'day)))
-                   (todo "STARTED" ((org-agenda-overriding-header "On-going Tasks")
+                   (alltodo "" ((org-agenda-overriding-header "On-going Tasks")
                                                  (org-agenda-skip-function '(or (org-agenda-skip-entry-if 'todo '("WAITING"))
                                                                                 (org-agenda-skip-subtree-if 'todo '("ON-HOLD"))
-                                                                                (org-agenda-skip-entry-if 'regexp ":project:")))))
+                                                                                (org-agenda-skip-entry-if 'regexp ":project:")
+                                                                                (org-agenda-skip-entry-if 'notregexp "CLOCK:")))))
                    (tags-todo "+PRIORITY=\"A\"" ((org-agenda-overriding-header "High Priority")
                                                  ))
                    (tags-todo "PRIORITY=\"B\"|PRIORITY=\"C\"" ((org-agenda-overriding-header "Medium Priority")
