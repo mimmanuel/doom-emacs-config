@@ -53,6 +53,9 @@
 ;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
 ;; they are implemented.
 
+(setq doom-localleader-key ","
+      doom-localleader-alt-key "M-,")
+
 ;;(server-start)
 
 (map!
@@ -63,6 +66,8 @@
  :desc "Delete server" "x" 'server-force-stop
  )
 
+(remove-hook 'server-visit-hook #'make-frame)
+
 (if (eq system-type 'darwin)
   ; something for OS X if true
   ; optional something if not
@@ -70,12 +75,44 @@
           mac-option-modifier 'option)
 )
 
+(pushnew! default-frame-alist '(height . 40) '(width . 128))
+
 (load-theme 'doom-palenight)
+
+(map!
+ :after evil
+ :n "TAB" #'evil-toggle-fold)
 
 (use-package! evil-org
   :after org
   :config
   (evil-org-set-key-theme '(navigation insert textobjects return todo additional calendar)))
+
+  (map!
+   :after org
+   :map org-mode-map
+   ;; Map RET to open-at-point
+   :n "RET" #'org-open-at-point
+   ;; Navigate Visible headings
+   :n "J" #'org-next-visible-heading
+   :n "K" #'org-previous-visible-heading
+   :n "L" #'org-show-subtree
+   :n "H" #'org-cycle)
+
+(use-package! nxml
+  :defer t
+  :mode ("\\.xml$" . nxml-mode)
+  :init
+  (setq nxml-auto-insert-xml-declaration-flag nil)
+  :config
+  (set-file-template! 'nxml-mode)
+  )
+
+(after! org
+  (pushnew! +org-babel-mode-alist '(xml . nxml)))
+
+(add-to-list 'auto-mode-alist '("\\.err$" . text-mode))
+(add-to-list 'auto-mode-alist '("\\.out$" . text-mode))
 
 ;;(load! "+org.el")
 
@@ -83,10 +120,6 @@
   (setq org-log-done 'time
         org-log-into-drawer t
         org-startup-folded nil))
-
-(map!
- :mode org
- :n "RET" #'org-open-at-point)
 
 (after! org
   (setq org-todo-keywords
@@ -109,18 +142,26 @@
       org-priority-default ?B)
 
 (after! org
+  (setq org-global-properties '(("Effort_ALL" . "0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00")
+                                "StoryPoints" . "1 2 3 5 8 13 20 40 100")
+        org-columns-default-format "%40ITEM(Task) %3StoryPoints(SP){:} %17Effort(Estimated Effort){:} %CLOCKSUM"))
+
+(after! org
   (setq org-capture-templates
         '(("t" "Todo" entry (file+headline "~/org/inbox.org" "Inbox")
-          "* TODO %?")
-          ("p" "Project" entry (file+headline "~/org/gtd.org" "Projects")
+           "* TODO [#C] %?")
+          ("u" "Urgent Todo" entry (file+headline "~/org/gtd.org" "Misc")
+           "* TODO [#A] %?"
+           :jump-to-captured t)
+          ("p" "Project" entry (file+headline "~/org/gtd.org" "Misc")
           "* ACTIVE %? [%] :project:")
           ("i" "Tickler" entry (file+olp+datetree "~/org/tickler.org")
           "* %?"))))
 
 (after! org
-  (setq org-tag-alist '(("important" . ?i) ("urgent" . ?u)
+  (setq org-tag-alist '(
                         (:startgroup . nil)
-                        ("@localpc" . ?l) ("@devpc" . ?l) ("@rqm" . ?r)
+                        ("@localpc" . ?l) ("@devpc" . ?d) ("@rqm" . ?r)
                         (:endgroup .nil)
                         (:newline . nil)
                         ("project" . ?p))))
@@ -137,6 +178,8 @@
 
   (custom-theme-set-faces
    'user
+   `(org-link ((t (:foreground ,base-font-color :underline t))))
+   `(org-list-dt ((t (:foreground ,base-font-color :weight bold))))
    `(org-level-8 ((t (,@headline))))
    `(org-level-7 ((t (,@headline))))
    `(org-level-6 ((t (,@headline))))
@@ -145,28 +188,34 @@
    `(org-level-3 ((t (,@headline :height 1.0))))
    `(org-level-2 ((t (,@headline :height 1.0))))
    `(org-level-1 ((t (,@headline :height 1.2 :weight bold))))
-   `(org-document-title ((t (,@headline :height 1.5 :underline nil)))))))
+   `(org-document-title ((t (,@headline :height 1.5 :underline nil :weight bold)))))))
 
 (use-package! org-superstar)
 
-(setq org-agenda-files (list "~/org/gtd.org"))
+(use-package! org-pomodoro
+  :defer t
+  :config
+  (setq org-pomodoro-audio-player (executable-find "vlc.exe"))
+  )
 
-(setq org-stuck-projects '("+PROJECT" ("TODO" "NEXT") nil ""))
+  (setq org-agenda-files (list "~/org/gtd.org"))
 
-(setq org-agenda-window-setup 'current-window)
-;;(add-hook 'evil-org-agenda-mode-hook #'org-super-agenda-mode)
-;;(setq org-super-agenda-header-map (make-sparse-keymap))
+  (setq org-stuck-projects '("+PROJECT" ("TODO" "NEXT") nil ""))
 
-(setq org-agenda-start-on-weekday nil
-      org-agenda-span 10
-      org-agenda-start-day "0d")
+  (setq org-agenda-window-setup 'current-window)
+  ;;(add-hook 'evil-org-agenda-mode-hook #'org-super-agenda-mode)
+  ;;(setq org-super-agenda-header-map (make-sparse-keymap))
 
-;; Speed up org-agenda
-;;
-(setq org-agenda-inhibit-startup t
-      org-agenda-dim-blocked-tasks nil
-      org-use-tag-inheritance nil
-      org-agenda-use-tag-inheritance nil)
+  (setq org-agenda-start-on-weekday nil
+        org-agenda-span 10
+        org-agenda-start-day "0d")
+
+  ;; Speed up org-agenda
+  ;;
+  (setq org-agenda-inhibit-startup t
+        org-agenda-dim-blocked-tasks nil
+        org-use-tag-inheritance nil
+        org-agenda-use-tag-inheritance nil)
 
 (use-package! org-super-agenda
   :after evil-org
@@ -180,31 +229,62 @@
 )
 
 (after! org
-  (setq org-agenda-custom-commands
-        '(("n" "Agenda"
-           ((org-ql-block '(todo "STARTED"))
-            (org-ql-block '(and (todo "TODO") (priority "A")))
-            (org-ql-block '(and (todo "TODO") (priority <= "B")))
-            ;;(todo "STARTED")
-            ;;(todo "TODO" ((org-agenda-overriding-header "Todo list")))
-            ))
-          ("r" . "Review")
-          ("rd" "Daily Review"
-           ((alltodo "" ((org-agenda-overriding-header "Inbox")
-                         (org-agenda-files (concat org-directory "inbox.org"))))))
-          )))
+  (setq org-agenda-custom-commands nil))
 
-(setq org-agenda-prefix-format '((agenda . " %-1i %?-12t% s")
-                                (todo . " %-1i ")
-                                (tags . " %-1i")
-                                (search . " %-1i")))
+(defmacro +mnie/add-org-agenda-custom-commands (command)
+  `(after! org (add-to-list 'org-agenda-custom-commands ,command)))
 
-(setq org-agenda-category-icon-alist
-      `(("" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
+(+mnie/add-org-agenda-custom-commands
+               '("n" "Next Actions"
+                  ((agenda "" ((org-agenda-overriding-header "Today")
+                               (org-agenda-span 'day)))
+                   (alltodo "" ((org-agenda-overriding-header "On-going Tasks")
+                                                 (org-agenda-skip-function '(or (org-agenda-skip-entry-if 'todo '("WAITING"))
+                                                                                (org-agenda-skip-subtree-if 'todo '("ON-HOLD"))
+                                                                                (org-agenda-skip-entry-if 'regexp ":project:")
+                                                                                (org-agenda-skip-entry-if 'notregexp "CLOCK:")))))
+                   (tags-todo "+PRIORITY=\"A\"" ((org-agenda-overriding-header "High Priority")
+                                                 ))
+                   (tags-todo "PRIORITY=\"B\"|PRIORITY=\"C\"" ((org-agenda-overriding-header "Medium Priority")
+                                                               (org-agenda-sorting-strategy '(priority-down))
+                                                               )))
+                  ((org-agenda-skip-function '(or (org-agenda-skip-entry-if 'todo '("STARTED" "WAITING"))
+                                                  (org-agenda-skip-subtree-if 'todo '("ON-HOLD"))
+                                                  (org-agenda-skip-entry-if 'regexp ":project:")
+                                                  (org-agenda-skip-entry-if 'regexp "CLOCK:"))))))
+
+(after! org
+  (add-to-list 'org-agenda-custom-commands '("r" . "Review") t))
+
+(after! org
+  (add-to-list 'org-agenda-custom-commands
+               '("rd" "Daily Review"
+                 ((todo "" ((org-agenda-overriding-header "Inbox")
+                            (org-agenda-files '((expand-file-name "inbox.org" org-directory)))))
+                  (tags-todo "EFFORT=\{\}" ((org-agenda-overriding-header "Process")))))))
+
+(after! org
+  (setq org-agenda-prefix-format '((agenda . " %-1i %?-12t% s")
+                                (todo . " %-1i %?(org-entry-get nil \"StoryPoints\") ")
+                                (tags . " %-1i %?(org-entry-get nil \"StoryPoints\") ")
+                                (search . " %-1i ")))
+
+  (setq org-agenda-category-icon-alist
+      `(
         ("Review" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
         ("Reading" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
         ("Development" ,(list (all-the-icons-material "computer")) nil nil :ascent center)
-        ("Planning" ,(list (all-the-icons-octicon "calendar")) nil nil :ascent center)))
+        ("Planning" ,(list (all-the-icons-octicon "calendar")) nil nil :ascent center)
+        ("Personal" ,(list (all-the-icons-material "person")) nil nil :ascent center)
+        ("Misc" ,(list (all-the-icons-octicon "checklist")) nil nil :ascent center)
+        ("" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)))
+)
+
+(after! org
+  (pushnew! org-link-abbrev-alist
+            '("rqm" . "https://clm.dgs.com/qm/web/console/System%20Verification%20for%20projects%20and%20products#action=com.ibm.rqm.planning.home.actionDispatcher&subAction=viewTestCase&id=%s")
+            '("jira" . "https://jira.kitenet.com/browse/%s"))
+  )
 
 (use-package! deft
   :init
