@@ -351,6 +351,14 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
    )
 #+end_src
 ***** Review :gtd:
+[[https://gettingthingsdone.com/2018/08/episode-43-the-power-of-the-gtd-weekly-review/][The 11 steps of the weekly review]]
++ Get Clear
+   1) Collect everything
+   2) Get "IN" to ZERO
+   3) Empty Your head
++ Get Current
+   1) Review Next Actions List
++ Get Creative
 #+begin_src emacs-lisp :tangle yes
 (after! org
   (add-to-list 'org-agenda-custom-commands '("r" . "Review") t))
