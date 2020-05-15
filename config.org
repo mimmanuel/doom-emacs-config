@@ -253,6 +253,8 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
 
   (custom-theme-set-faces
    'user
+   `(org-link ((t (:foreground ,base-font-color :underline t))))
+   `(org-list-dt ((t (:foreground ,base-font-color :weight bold))))
    `(org-level-8 ((t (,@headline))))
    `(org-level-7 ((t (,@headline))))
    `(org-level-6 ((t (,@headline))))
