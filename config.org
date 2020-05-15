@@ -235,7 +235,7 @@ Set pritories ranging from A to D
                         ("project" . ?p))))
 #+end_src
 
-*** UI
+*** UI :ui:
 **** Faces
 Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
 
