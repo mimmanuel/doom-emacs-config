@@ -118,6 +118,19 @@ Add some bindings for server manipulation
   (evil-org-set-key-theme '(navigation insert textobjects return todo additional calendar)))
 #+end_src
 
+*** Bindings :bindings:
+#+begin_src emacs-lisp :tangle yes
+  (map!
+   :after org
+   :map org-mode-map
+   ;; Map RET to open-at-point
+   :n "RET" #'org-open-at-point
+   ;; Navigate Visible headings
+   :n "J" #'org-next-visible-heading
+   :n "K" #'org-previous-visible-heading
+   :n "L" #'org-show-subtree
+   :n "H" #'org-cycle)
+#+end_src
 * Modes
 ** nxml
 #+begin_src emacs-lisp :tangle yes
@@ -152,19 +165,6 @@ Add some bindings for server manipulation
   (setq org-log-done 'time
         org-log-into-drawer t
         org-startup-folded nil))
-#+end_src
-**** Bindings :bindings:
-#+begin_src emacs-lisp :tangle yes
-  (map!
-   :after evil-org
-   :map evil-org-mode-map
-   ;; Map RET to open-at-point
-   :n "RET" #'org-open-at-point
-   ;; Navigate Visible headings
-   :n "J" #'org-next-visible-heading
-   :n "K" #'org-previous-visible-heading
-   :n "L" #'org-show-subtree
-   :n "H" #'org-cycle)
 #+end_src
 **** Todo-keywords
 #+begin_src emacs-lisp :tangle yes
