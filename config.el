@@ -231,8 +231,11 @@
 (after! org
   (setq org-agenda-custom-commands nil))
 
-(defmacro +mnie/add-org-agenda-custom-commands (command)
-  `(after! org (add-to-list 'org-agenda-custom-commands ,command)))
+(defmacro +mnie/add-org-agenda-custom-commands (&rest command)
+  "Add new COMMAND to org-agenda-custom-commands sequentially"
+  (let ((var (make-symbol "result")))
+    `(dolist (,var (list ,@command) nil)
+       (after! org (add-to-list 'org-agenda-custom-commands ,var)))))
 
 (+mnie/add-org-agenda-custom-commands
                '("n" "Next Actions"
@@ -253,6 +256,10 @@
                                                   (org-agenda-skip-entry-if 'regexp ":project:")
                                                   (org-agenda-skip-entry-if 'regexp "CLOCK:"))))))
 
+(+mnie/add-org-agenda-custom-commands  '("c" . "Contexts"))
+(+mnie/add-org-agenda-custom-commands '("cl" "@localpc" tags-todo "@localpc"))
+(+mnie/add-org-agenda-custom-commands '("cd" "@devpc" tags-todo "@devpc"))
+
 (after! org
   (add-to-list 'org-agenda-custom-commands '("r" . "Review") t))
 
@@ -260,13 +267,16 @@
   (add-to-list 'org-agenda-custom-commands
                '("rd" "Daily Review"
                  ((todo "" ((org-agenda-overriding-header "Inbox")
-                            (org-agenda-files '((expand-file-name "inbox.org" org-directory)))))
-                  (tags-todo "EFFORT=\{\}" ((org-agenda-overriding-header "Process")))))))
+                            (org-agenda-files (list (expand-file-name "inbox.org" org-directory)))))
+                  (todo "" ((org-agenda-overriding-header "Process")
+                            (org-agenda-skip-function '(or (org-agenda-skip-entry-if 'regexp ":project:")
+                                                           (and (org-agenda-skip-entry-if 'regexp ":@\\w+:"))))))
+                  (tags-todo "refine" ((org-agenda-overriding-header "Refine")))))))
 
 (after! org
   (setq org-agenda-prefix-format '((agenda . " %-1i %?-12t% s")
-                                (todo . " %-1i %?(org-entry-get nil \"StoryPoints\") ")
-                                (tags . " %-1i %?(org-entry-get nil \"StoryPoints\") ")
+                                (todo . " %-1i ")
+                                (tags . " %-1i ")
                                 (search . " %-1i ")))
 
   (setq org-agenda-category-icon-alist
