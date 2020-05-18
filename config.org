@@ -362,6 +362,12 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
                                                   (org-agenda-skip-entry-if 'regexp ":project:")
                                                   (org-agenda-skip-entry-if 'regexp "CLOCK:"))))))
 #+end_src
+***** GTD Contexts
+#+begin_src emacs-lisp :tangle yes
+(+mnie/add-org-agenda-custom-commands  '("c" . "Contexts"))
+(+mnie/add-org-agenda-custom-commands '("cl" "@localpc" tags-todo "@localpc"))
+(+mnie/add-org-agenda-custom-commands '("cd" "@devpc" tags-todo "@devpc"))
+#+end_src
 ***** Review :gtd:
 [[https://gettingthingsdone.com/2018/08/episode-43-the-power-of-the-gtd-weekly-review/][The 11 steps of the weekly review]]
 + Get Clear
