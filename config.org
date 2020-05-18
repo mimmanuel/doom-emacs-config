@@ -335,8 +335,11 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
-(defmacro +mnie/add-org-agenda-custom-commands (command)
-  `(after! org (add-to-list 'org-agenda-custom-commands ,command)))
+(defmacro +mnie/add-org-agenda-custom-commands (&rest command)
+  "Add new COMMAND to org-agenda-custom-commands sequentially"
+  (let ((var (make-symbol "result")))
+    `(dolist (,var (list ,@command) nil)
+       (after! org (add-to-list 'org-agenda-custom-commands ,var)))))
 #+end_src
 ***** Next Actions list :gtd:
 #+begin_src emacs-lisp :tangle yes
