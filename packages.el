@@ -58,3 +58,4 @@
 (package! outlookedit
   :recipe (:host github :repo "dholm/outlookedit"))
 
+(package! zetteldeft)
