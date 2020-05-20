@@ -99,6 +99,18 @@
    :n "L" #'org-show-subtree
    :n "H" #'org-cycle)
 
+(use-package! outlookedit
+  ;;:defer t
+  :config (setq mno-get-outlook-body (concat "cscript //Job:getMessage " (expand-file-name "~//bin//outlook_emacs.wsf"))
+                mno-put-outlook-body (concat "cscript //Job:putMessage " (expand-file-name "~//bin//outlook_emacs.wsf"))))
+
+(map!
+ :after outlookedit
+ :leader
+ :prefix ("oo" . "Outlook")
+ :desc "Edit" "e" #'mno-edit-outlook-message
+ :desc "Save" "s" #'mno-put-outlook-message)
+
 (use-package! nxml
   :defer t
   :mode ("\\.xml$" . nxml-mode)
@@ -156,7 +168,9 @@
           ("p" "Project" entry (file+headline "~/org/gtd.org" "Misc")
           "* ACTIVE %? [%] :project:")
           ("i" "Tickler" entry (file+olp+datetree "~/org/tickler.org")
-          "* %?"))))
+           "* %?")
+          ("l" "link" plain (file "~/org/links.org")
+           "[[%^{Link}][%^{Description}]]"))))
 
 (after! org
   (setq org-tag-alist '(
