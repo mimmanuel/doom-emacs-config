@@ -136,6 +136,22 @@ Add hook to create new frame
    :n "L" #'org-show-subtree
    :n "H" #'org-cycle)
 #+end_src
+* Outlook
+#+begin_src emacs-lisp :tangle yes
+(use-package! outlookedit
+  ;;:defer t
+  :config (setq mno-get-outlook-body (concat "cscript //Job:getMessage " (expand-file-name "~//bin//outlook_emacs.wsf"))
+                mno-put-outlook-body (concat "cscript //Job:putMessage " (expand-file-name "~//bin//outlook_emacs.wsf"))))
+#+end_src
+** Bindings :bindings:
+#+begin_src emacs-lisp :tangle yes
+(map!
+ :after outlookedit
+ :leader
+ :prefix ("oo" . "Outlook")
+ :desc "Edit" "e" #'mno-edit-outlook-message
+ :desc "Save" "s" #'mno-put-outlook-message)
+#+end_src
 * Modes
 ** nxml
 #+begin_src emacs-lisp :tangle yes
