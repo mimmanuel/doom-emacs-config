@@ -243,7 +243,9 @@ Set pritories ranging from A to D
           ("p" "Project" entry (file+headline "~/org/gtd.org" "Misc")
           "* ACTIVE %? [%] :project:")
           ("i" "Tickler" entry (file+olp+datetree "~/org/tickler.org")
-          "* %?"))))
+           "* %?")
+          ("l" "link" plain (file "~/org/links.org")
+           "[[%^{Link}][%^{Description}]]"))))
 #+end_src
 **** Tags
 #+begin_src emacs-lisp :tangle yes
