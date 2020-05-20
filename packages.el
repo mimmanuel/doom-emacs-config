@@ -54,3 +54,7 @@
   (package! org-super-agenda))
 
 (package! org-ql)
+
+(package! outlookedit
+  :recipe (:host github :repo "dholm/outlookedit"))
+
