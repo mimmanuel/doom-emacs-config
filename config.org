@@ -65,10 +65,6 @@ clients, file templates and snippets.
       doom-localleader-alt-key "M-,")
 #+end_src
 * Server mode
-Start emacs in server mode
-#+begin_src emacs-lisp :tangle yes :results silent
-;;(server-start)
-#+end_src
 
 Add some bindings for server manipulation
 #+begin_src emacs-lisp :tangle yes :results silent
