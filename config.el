@@ -1,16 +1,8 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
-;; Place your private configuration here! Remember, you do not need to run 'doom
-;; sync' after modifying this file!
-
-
-;; Some functionality uses this to identify you, e.g. GPG configuration, email
-;; clients, file templates and snippets.
 (setq user-full-name "Mathias Nielsen"
       user-mail-address "john@doe.com")
 
-;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
-;; are the three important ones:
 ;;
 ;; + `doom-font'
 ;; + `doom-variable-pitch-font'
@@ -56,8 +48,6 @@
 (setq doom-localleader-key ","
       doom-localleader-alt-key "M-,")
 
-;;(server-start)
-
 (map!
  :leader
  :prefix ("S" . "server")
@@ -84,6 +74,7 @@
  :n "TAB" #'evil-toggle-fold)
 
 (use-package! evil-org
+  :defer t
   :after org
   :config
   (evil-org-set-key-theme '(navigation insert textobjects return todo additional calendar)))
@@ -100,7 +91,8 @@
    :n "H" #'org-cycle)
 
 (use-package! outlookedit
-  ;;:defer t
+  :defer t
+  :commands mno-edit-outlook-message mno-put-outlook-message
   :config (setq mno-get-outlook-body (concat "cscript //Job:getMessage " (expand-file-name "~//bin//outlook_emacs.wsf"))
                 mno-put-outlook-body (concat "cscript //Job:putMessage " (expand-file-name "~//bin//outlook_emacs.wsf"))))
 
@@ -111,20 +103,17 @@
  :desc "Edit" "e" #'mno-edit-outlook-message
  :desc "Save" "s" #'mno-put-outlook-message)
 
-(use-package! nxml
+(use-package! nxml-mode
   :defer t
   :mode ("\\.xml$" . nxml-mode)
   :init
-  (setq nxml-auto-insert-xml-declaration-flag nil)
   :config
+  (setq nxml-auto-insert-xml-declaration-flag nil)
   (set-file-template! 'nxml-mode)
   )
 
 (after! org
   (pushnew! +org-babel-mode-alist '(xml . nxml)))
-
-(add-to-list 'auto-mode-alist '("\\.err$" . text-mode))
-(add-to-list 'auto-mode-alist '("\\.out$" . text-mode))
 
 ;;(load! "+org.el")
 
@@ -158,6 +147,11 @@
                                 "StoryPoints" . "1 2 3 5 8 13 20 40 100")
         org-columns-default-format "%40ITEM(Task) %3StoryPoints(SP){:} %17Effort(Estimated Effort){:} %CLOCKSUM"))
 
+(defun mnie-make-client-folder (client-name)
+  (let ((client-dir-name (concat "C:/Temp/Elisp" client-name)))
+    (make-directory client-dir-name 'parent)
+    (format "[[file:%s][Directory]]" client-dir-name)))
+
 (after! org
   (setq org-capture-templates
         '(("t" "Todo" entry (file+headline "~/org/inbox.org" "Inbox")
@@ -170,15 +164,16 @@
           ("i" "Tickler" entry (file+olp+datetree "~/org/tickler.org")
            "* %?")
           ("l" "link" plain (file "~/org/links.org")
-           "[[%^{Link}][%^{Description}]]"))))
+           "[[%^{Link}][%^{Description}]]")
+          )))
 
 (after! org
   (setq org-tag-alist '(
                         (:startgroup . nil)
-                        ("@localpc" . ?l) ("@devpc" . ?d) ("@rqm" . ?r)
+                        ("@localpc" . ?l) ("@devpc" . ?d) ("@rqm" . ?r) ("@emacs" . ?e)
                         (:endgroup .nil)
                         (:newline . nil)
-                        ("project" . ?p))))
+                        ("project" . ?p) ("noexport" . ?n))))
 
 (after! org
   (let* ((variable-tuple
@@ -204,7 +199,8 @@
    `(org-level-1 ((t (,@headline :height 1.2 :weight bold))))
    `(org-document-title ((t (,@headline :height 1.5 :underline nil :weight bold)))))))
 
-(use-package! org-superstar)
+(use-package! org-superstar
+  :defer t)
 
 (use-package! org-pomodoro
   :defer t
@@ -232,15 +228,10 @@
         org-agenda-use-tag-inheritance nil)
 
 (use-package! org-super-agenda
+  :defer t
   :after evil-org
   :config
   (add-hook 'evil-org-agenda-mode-hook #'org-super-agenda-mode))
-
-(use-package! org-ql
-  :after org
-  :config
-    (defvaralias 'org-lowest-priority 'org-priority-lowest)
-)
 
 (after! org
   (setq org-agenda-custom-commands nil))
@@ -270,9 +261,11 @@
                                                   (org-agenda-skip-entry-if 'regexp ":project:")
                                                   (org-agenda-skip-entry-if 'regexp "CLOCK:"))))))
 
-(+mnie/add-org-agenda-custom-commands  '("c" . "Contexts"))
-(+mnie/add-org-agenda-custom-commands '("cl" "@localpc" tags-todo "@localpc"))
-(+mnie/add-org-agenda-custom-commands '("cd" "@devpc" tags-todo "@devpc"))
+(+mnie/add-org-agenda-custom-commands  '("c" . "Contexts")
+                                       '("cl" "@localpc" tags-todo "@localpc")
+                                       '("cd" "@devpc" tags-todo "@devpc")
+                                       '("cr" "@rqm" tags-todo "@rqm")
+                                       '("ce" "@emacs" tags-todo "@emacs"))
 
 (after! org
   (add-to-list 'org-agenda-custom-commands '("r" . "Review") t))
@@ -310,13 +303,72 @@
             '("jira" . "https://jira.kitenet.com/browse/%s"))
   )
 
-(use-package! deft
-  :init
-  (setq deft-directory "~/.deft/"))
+(setq org-publish-project-alist '(
+                                  ("deft-html"
+                                   :base-directory "~/.deft/"
+                                   :base-extension  "org"
+                                   :publishing-directory "~/html_export/.deft"
+                                   :publishing-function org-html-publish-to-html
+                                   )
+                                  ("deft-media"
+                                   :base-directory "~/.deft/media/"
+                                   :base-extension "png\\|svg"
+                                   :publishing-directory "~/html_export/.deft/media"
+                                   :publishing-function org-publish-attachment)
+                                  ("deft-docx"
+                                   :base-directory "~/.deft/"
+                                   :base-extension "org"
+                                   :publishing-directory "~/docx_export/.deft/"
+                                   :publishing-function org-pandoc-export-to-docx
+                                   )))
 
-(setq org-agenda-category-icon-alist
-      `(("" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
-        ("Review" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
-        ("Reading" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
-        ("Development" ,(list (all-the-icons-material "computer")) nil nil :ascent center)
-        ("Planning" ,(list (all-the-icons-octicon "calendar")) nil nil :ascent center)))
+(use-package! deft
+  :defer t
+  :init
+  (setq deft-directory "~/.deft/"
+        deft-use-filter-string-for-filename nil
+        deft-use-filename-as-title nil)
+  (advice-add #'deft-complete :after '(lambda () (kill-buffer "*Deft*"))))
+
+(use-package! zetteldeft
+  :defer t
+  :after deft
+  :commands
+ zetteldeft-deft-new-search
+ zetteldeft-search-at-point
+ zetteldeft-search-current-id
+ zetteldeft-follow-link
+ zetteldeft-avy-file-search-ace-window
+ zetteldeft-avy-link-search
+ zetteldeft-avy-tag-search
+ zetteldeft-tag-buffer
+ zetteldeft-find-file-id-insert
+ zetteldeft-find-file-full-title-insert
+ zetteldeft-find-file
+ zetteldeft-new-file
+ zetteldeft-new-file-and-link
+ zetteldeft-file-rename
+ zetteldeft-count-words
+)
+
+(map!
+ :leader
+ :prefix ("d" . "+deft")
+ :desc "deft" "d" #'deft
+ :desc "Browse deft directory" "B" (lambda () (interactive) (dired deft-directory))
+ :desc "new file" "n" (lambda (str) (interactive (list (read-string "name: "))) (zetteldeft-new-file str t))
+ :desc "insert id" "i" #'zetteldeft-find-file-id-insert
+ :desc "insert id+title" "I" #'zetteldeft-find-file-full-title-insert
+ :desc "follow link" "f" #'zetteldeft-follow-link
+ "F" #'zetteldeft-avy-file-search-ace-window
+ :desc "avy link search" "l" #'zetteldeft-avy-link-search)
+ ;;:desc "new file+link" "N" '(zetteldeft-new-file-and-link t))
+
+(use-package! plantuml-mode
+  :defer t
+  :init
+  (setq plantuml-default-exec-mode 'jar
+        plantuml-jar-path "~/bin/plantuml.jar"))
+
+(add-to-list 'auto-mode-alist '("\\.err$" . text-mode))
+(add-to-list 'auto-mode-alist '("\\.out$" . text-mode))
