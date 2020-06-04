@@ -434,11 +434,37 @@ Setup agenda view to only show category icon
             '("jira" . "https://jira.kitenet.com/browse/%s"))
   )
 #+end_src
+*** Publish
+
+#+begin_src emacs-lisp :tangle yes
+(setq org-publish-project-alist '(
+                                  ("deft-html"
+                                   :base-directory "~/.deft/"
+                                   :base-extension  "org"
+                                   :publishing-directory "~/html_export/.deft"
+                                   :publishing-function org-html-publish-to-html
+                                   )
+                                  ("deft-media"
+                                   :base-directory "~/.deft/media/"
+                                   :base-extension "png\\|svg"
+                                   :publishing-directory "~/html_export/.deft/media"
+                                   :publishing-function org-publish-attachment)
+                                  ("deft-docx"
+                                   :base-directory "~/.deft/"
+                                   :base-extension "org"
+                                   :publishing-directory "~/docx_export/.deft/"
+                                   :publishing-function org-pandoc-export-to-docx
+                                   )))
+#+end_src
 ** deft
 #+begin_src emacs-lisp :tangle yes
 (use-package! deft
+  :defer t
   :init
-  (setq deft-directory "~/.deft/"))
+  (setq deft-directory "~/.deft/"
+        deft-use-filter-string-for-filename nil
+        deft-use-filename-as-title nil)
+  (advice-add #'deft-complete :after '(lambda () (kill-buffer "*Deft*"))))
 #+end_src
 ** TODO Zetteldeft
 
