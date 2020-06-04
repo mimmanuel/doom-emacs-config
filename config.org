@@ -166,12 +166,6 @@ Add hook to create new frame
   (pushnew! +org-babel-mode-alist '(xml . nxml)))
 #+end_src
 
-** Misc
-*** open .err-files as text-mode
-#+begin_src emacs-lisp :tangle yes
-(add-to-list 'auto-mode-alist '("\\.err$" . text-mode))
-(add-to-list 'auto-mode-alist '("\\.out$" . text-mode))
-#+end_src
 ** org :org:
 #+begin_src emacs-lisp :tangle yes
 ;;(load! "+org.el")
