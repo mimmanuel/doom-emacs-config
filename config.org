@@ -237,17 +237,18 @@ Set pritories ranging from A to D
           ("i" "Tickler" entry (file+olp+datetree "~/org/tickler.org")
            "* %?")
           ("l" "link" plain (file "~/org/links.org")
-           "[[%^{Link}][%^{Description}]]"))))
+           "[[%^{Link}][%^{Description}]]")
+          )))
 #+end_src
 **** Tags
 #+begin_src emacs-lisp :tangle yes
 (after! org
   (setq org-tag-alist '(
                         (:startgroup . nil)
-                        ("@localpc" . ?l) ("@devpc" . ?d) ("@rqm" . ?r)
+                        ("@localpc" . ?l) ("@devpc" . ?d) ("@rqm" . ?r) ("@emacs" . ?e)
                         (:endgroup .nil)
                         (:newline . nil)
-                        ("project" . ?p))))
+                        ("project" . ?p) ("noexport" . ?n))))
 #+end_src
 
 *** UI :ui:
