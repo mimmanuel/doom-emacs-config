@@ -3,11 +3,21 @@
 (use-package! matlab-mode
   :mode ("\\.m$" . matlab-mode)
   :defer t
-  :config
+  :init
   (add-hook 'matlab-mode-hook #'mnie/run-prog-mode-hooks))
 
 (after! highlight-numbers
   (puthash 'matlab-mode 'do-not-use highlight-numbers-modelist))
+
+(after! projectile
+  (pushnew! projectile-project-root-files "matlabsetup.m"))
+
+(map!
+ :mode matlab-mode
+ :localleader
+ "f" #'matlab-beginning-of-defun
+ "F" #'matlab-end-of-defun
+ )
 
 ;;;### autoload
 ;;;
