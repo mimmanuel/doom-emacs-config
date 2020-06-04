@@ -153,12 +153,12 @@ Add hook to create new frame
 * Modes
 ** nxml
 #+begin_src emacs-lisp :tangle yes
-(use-package! nxml
+(use-package! nxml-mode
   :defer t
   :mode ("\\.xml$" . nxml-mode)
   :init
-  (setq nxml-auto-insert-xml-declaration-flag nil)
   :config
+  (setq nxml-auto-insert-xml-declaration-flag nil)
   (set-file-template! 'nxml-mode)
   )
 
