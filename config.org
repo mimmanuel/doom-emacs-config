@@ -488,28 +488,55 @@ Setup agenda view to only show category icon
 | C-c d r | zetteldeft-file-rename                 |
 | C-c d x | zetteldeft-count-words                 |
 
-* Getting Things Done
-** Collection
-** Tags
-
-*** Contexts
-Contexts are implemented using tags, in org mode tags are defined in org-tag-alist
 #+begin_src emacs-lisp :tangle yes
-(setq org-agenda-category-icon-alist
-      `(("" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
-        ("Review" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
-        ("Reading" ,(list (all-the-icons-material "library_books")) nil nil :ascent center)
-        ("Development" ,(list (all-the-icons-material "computer")) nil nil :ascent center)
-        ("Planning" ,(list (all-the-icons-octicon "calendar")) nil nil :ascent center)))
+(use-package! zetteldeft
+  :defer t
+  :after deft
+  :commands
+ zetteldeft-deft-new-search
+ zetteldeft-search-at-point
+ zetteldeft-search-current-id
+ zetteldeft-follow-link
+ zetteldeft-avy-file-search-ace-window
+ zetteldeft-avy-link-search
+ zetteldeft-avy-tag-search
+ zetteldeft-tag-buffer
+ zetteldeft-find-file-id-insert
+ zetteldeft-find-file-full-title-insert
+ zetteldeft-find-file
+ zetteldeft-new-file
+ zetteldeft-new-file-and-link
+ zetteldeft-file-rename
+ zetteldeft-count-words
+)
+
+(map!
+ :leader
+ :prefix ("d" . "+deft")
+ :desc "deft" "d" #'deft
+ :desc "Browse deft directory" "B" (lambda () (interactive) (dired deft-directory))
+ :desc "new file" "n" (lambda (str) (interactive (list (read-string "name: "))) (zetteldeft-new-file str t))
+ :desc "insert id" "i" #'zetteldeft-find-file-id-insert
+ :desc "insert id+title" "I" #'zetteldeft-find-file-full-title-insert
+ :desc "follow link" "f" #'zetteldeft-follow-link
+ "F" #'zetteldeft-avy-file-search-ace-window
+ :desc "avy link search" "l" #'zetteldeft-avy-link-search)
+ ;;:desc "new file+link" "N" '(zetteldeft-new-file-and-link t))
 #+end_src
 
-#+RESULTS:
-|             | () | nil | nil | :ascent | center |
-| Review      | () | nil | nil | :ascent | center |
-| Reading     | () | nil | nil | :ascent | center |
-| Development | () | nil | nil | :ascent | center |
-| Planning    | () | nil | nil | :ascent | center |
-: ((important . 105) (urgent . 117) (:newline) (project . 112) (:startgroup) (@workpc . 119) (@labpc . 108) (:endgroup))
-** Daily Review
-** Weekly Review
-** Next Action
+
+** Plantuml
+#+begin_src emacs-lisp :tangle yes
+(use-package! plantuml-mode
+  :defer t
+  :init
+  (setq plantuml-default-exec-mode 'jar
+        plantuml-jar-path "~/bin/plantuml.jar"))
+#+end_src
+** Misc
+*** open .err-files as text-mode
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'auto-mode-alist '("\\.err$" . text-mode))
+(add-to-list 'auto-mode-alist '("\\.out$" . text-mode))
+#+end_src
+
