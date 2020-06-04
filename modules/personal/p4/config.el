@@ -10,3 +10,6 @@
  :desc "Add" "a" #'p4-add
  :desc "Edit" "e" #'p4-edit
  :desc "Submit" "s" #'p4-submit);)
+
+(after! projectile
+  (pushnew! projectile-project-root-files ".p4settings"))
