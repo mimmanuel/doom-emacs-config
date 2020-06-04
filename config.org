@@ -114,6 +114,7 @@ Add hook to create new frame
 
 #+begin_src emacs-lisp :tangle yes :results silent
 (use-package! evil-org
+  :defer t
   :after org
   :config
   (evil-org-set-key-theme '(navigation insert textobjects return todo additional calendar)))
@@ -135,7 +136,8 @@ Add hook to create new frame
 * Outlook
 #+begin_src emacs-lisp :tangle yes
 (use-package! outlookedit
-  ;;:defer t
+  :defer t
+  :commands mno-edit-outlook-message mno-put-outlook-message
   :config (setq mno-get-outlook-body (concat "cscript //Job:getMessage " (expand-file-name "~//bin//outlook_emacs.wsf"))
                 mno-put-outlook-body (concat "cscript //Job:putMessage " (expand-file-name "~//bin//outlook_emacs.wsf"))))
 #+end_src
