@@ -115,8 +115,6 @@
 (after! org
   (pushnew! +org-babel-mode-alist '(xml . nxml)))
 
-;;(load! "+org.el")
-
 (after! org
   (setq org-log-done 'time
         org-log-into-drawer t
@@ -146,11 +144,6 @@
   (setq org-global-properties '(("Effort_ALL" . "0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00")
                                 "StoryPoints" . "1 2 3 5 8 13 20 40 100")
         org-columns-default-format "%40ITEM(Task) %3StoryPoints(SP){:} %17Effort(Estimated Effort){:} %CLOCKSUM"))
-
-(defun mnie-make-client-folder (client-name)
-  (let ((client-dir-name (concat "C:/Temp/Elisp" client-name)))
-    (make-directory client-dir-name 'parent)
-    (format "[[file:%s][Directory]]" client-dir-name)))
 
 (after! org
   (setq org-capture-templates
@@ -282,8 +275,8 @@
 
 (after! org
   (setq org-agenda-prefix-format '((agenda . " %-1i %?-12t% s")
-                                (todo . " %-1i ")
-                                (tags . " %-1i ")
+                                (todo . " %-1i %4(or (org-entry-get (point) \"CLOCKSUM\") \"0:00\") / %4e ")
+                                (tags . " %-1i %4(or (org-entry-get (point) \"CLOCKSUM\") \"0:00\") / %4e ")
                                 (search . " %-1i ")))
 
   (setq org-agenda-category-icon-alist
@@ -328,41 +321,67 @@
   (setq deft-directory "~/.deft/"
         deft-use-filter-string-for-filename nil
         deft-use-filename-as-title nil)
-  (advice-add #'deft-complete :after '(lambda () (kill-buffer "*Deft*"))))
+  (advice-add #'deft-complete :after '(lambda () (kill-buffer "*Deft*")))
+  (map!
+   :map deft-mode-map
+   :i "C-j" #'evil-next-line
+   :i "C-k" #'evil-previous-line))
 
 (use-package! zetteldeft
   :defer t
-  :after deft
   :commands
- zetteldeft-deft-new-search
- zetteldeft-search-at-point
- zetteldeft-search-current-id
- zetteldeft-follow-link
- zetteldeft-avy-file-search-ace-window
- zetteldeft-avy-link-search
- zetteldeft-avy-tag-search
- zetteldeft-tag-buffer
- zetteldeft-find-file-id-insert
- zetteldeft-find-file-full-title-insert
- zetteldeft-find-file
- zetteldeft-new-file
- zetteldeft-new-file-and-link
- zetteldeft-file-rename
- zetteldeft-count-words
-)
+  (
+   zetteldeft-deft-new-search
+   zetteldeft-search-at-point
+   zetteldeft-search-current-id
+   zetteldeft-follow-link
+   zetteldeft-avy-file-search-ace-window
+   zetteldeft-avy-link-search
+   zetteldeft-avy-tag-search
+   zetteldeft-tag-buffer
+   zetteldeft-find-file-id-insert
+   zetteldeft-find-file-full-title-insert
+   zetteldeft-find-file
+   zetteldeft-new-file
+   zetteldeft-new-file-and-link
+   zetteldeft-file-rename
+   zetteldeft-count-words
+   )
+  :init
 
 (map!
  :leader
  :prefix ("d" . "+deft")
- :desc "deft" "d" #'deft
- :desc "Browse deft directory" "B" (lambda () (interactive) (dired deft-directory))
- :desc "new file" "n" (lambda (str) (interactive (list (read-string "name: "))) (zetteldeft-new-file str t))
- :desc "insert id" "i" #'zetteldeft-find-file-id-insert
- :desc "insert id+title" "I" #'zetteldeft-find-file-full-title-insert
- :desc "follow link" "f" #'zetteldeft-follow-link
- "F" #'zetteldeft-avy-file-search-ace-window
- :desc "avy link search" "l" #'zetteldeft-avy-link-search)
- ;;:desc "new file+link" "N" '(zetteldeft-new-file-and-link t))
+
+ "d"  #'deft
+ "D"  #'zetteldeft-deft-new-search
+ "R"  #'deft-refresh
+ "s"  #'zetteldeft-search-at-point
+ "c"  #'zetteldeft-search-current-id
+ "f"  #'zetteldeft-follow-link
+ "F"  #'zetteldeft-avy-file-search-ace-window
+ "l"  #'zetteldeft-avy-link-search
+ "t"  #'zetteldeft-avy-tag-search
+ "T"  #'zetteldeft-tag-buffer
+ "i"  #'zetteldeft-find-file-id-insert
+ "I"  #'zetteldeft-find-file-full-title-insert
+ "o"  #'zetteldeft-find-file
+ "n"  #'zetteldeft-new-file
+ "N"  #'zetteldeft-new-file-and-link
+ "r"  #'zetteldeft-file-rename
+ "x"  #'zetteldeft-count-words
+ ;; :desc "deft" "d" #'deft
+ ;; :desc "Browse deft directory" "B" (lambda () (interactive) (dired deft-directory))
+ ;; :desc "new file" "n" (lambda (str) (interactive (list (read-string "name: "))) (zetteldeft-new-file str t))
+ ;; :desc "insert id" "i" #'zetteldeft-find-file-id-insert
+ ;; :desc "insert id+title" "I" #'zetteldeft-find-file-full-title-insert
+ ;; :desc "follow link" "f" #'zetteldeft-follow-link
+ ;; "F" #'zetteldeft-avy-file-search-ace-window
+ ;; :desc "avy link search" "l" #'zetteldeft-avy-link-search)
+  ))
+
+
+;;:desc "new file+link" "N" '(zetteldeft-new-file-and-link t))
 
 (use-package! plantuml-mode
   :defer t

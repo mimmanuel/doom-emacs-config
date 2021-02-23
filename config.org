@@ -167,10 +167,6 @@ Add hook to create new frame
 #+end_src
 
 ** org :org:
-#+begin_src emacs-lisp :tangle yes
-;;(load! "+org.el")
-#+end_src
-
 *** General Setup
 **** Inital setup
 #+begin_src emacs-lisp :tangle yes
@@ -254,7 +250,6 @@ Set pritories ranging from A to D
 *** UI :ui:
 **** Faces
 Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
-
 
 #+begin_src emacs-lisp :tangle yes
 (after! org
@@ -351,6 +346,7 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
 (+mnie/add-org-agenda-custom-commands
                '("n" "Next Actions"
                   ((agenda "" ((org-agenda-overriding-header "Today")
+                               (org-agenda-start-day nil)
                                (org-agenda-span 'day)))
                    (alltodo "" ((org-agenda-overriding-header "On-going Tasks")
                                                  (org-agenda-skip-function '(or (org-agenda-skip-entry-if 'todo '("WAITING"))
@@ -411,8 +407,8 @@ Setup agenda view to only show category icon
 #+BEGIN_SRC emacs-lisp :tangle yes
 (after! org
   (setq org-agenda-prefix-format '((agenda . " %-1i %?-12t% s")
-                                (todo . " %-1i ")
-                                (tags . " %-1i ")
+                                (todo . " %-1i %4(or (org-entry-get (point) \"CLOCKSUM\" t) \"0:00\") / %4e ")
+                                (tags . " %-1i %4(or (org-entry-get (point) \"CLOCKSUM\" t) \"0:00\") / %4e ")
                                 (search . " %-1i ")))
 
   (setq org-agenda-category-icon-alist
@@ -464,9 +460,13 @@ Setup agenda view to only show category icon
   (setq deft-directory "~/.deft/"
         deft-use-filter-string-for-filename nil
         deft-use-filename-as-title nil)
-  (advice-add #'deft-complete :after '(lambda () (kill-buffer "*Deft*"))))
+  (advice-add #'deft-complete :after '(lambda () (kill-buffer "*Deft*")))
+  (map!
+   :map deft-mode-map
+   :i "C-j" #'evil-next-line
+   :i "C-k" #'evil-previous-line))
 #+end_src
-** TODO Zetteldeft
+** Zetteldeft
 
 | Key     | Function                               |
 |---------+----------------------------------------|
@@ -489,39 +489,62 @@ Setup agenda view to only show category icon
 | C-c d x | zetteldeft-count-words                 |
 
 #+begin_src emacs-lisp :tangle yes
+
 (use-package! zetteldeft
   :defer t
-  :after deft
   :commands
- zetteldeft-deft-new-search
- zetteldeft-search-at-point
- zetteldeft-search-current-id
- zetteldeft-follow-link
- zetteldeft-avy-file-search-ace-window
- zetteldeft-avy-link-search
- zetteldeft-avy-tag-search
- zetteldeft-tag-buffer
- zetteldeft-find-file-id-insert
- zetteldeft-find-file-full-title-insert
- zetteldeft-find-file
- zetteldeft-new-file
- zetteldeft-new-file-and-link
- zetteldeft-file-rename
- zetteldeft-count-words
-)
+  (
+   zetteldeft-deft-new-search
+   zetteldeft-search-at-point
+   zetteldeft-search-current-id
+   zetteldeft-follow-link
+   zetteldeft-avy-file-search-ace-window
+   zetteldeft-avy-link-search
+   zetteldeft-avy-tag-search
+   zetteldeft-tag-buffer
+   zetteldeft-find-file-id-insert
+   zetteldeft-find-file-full-title-insert
+   zetteldeft-find-file
+   zetteldeft-new-file
+   zetteldeft-new-file-and-link
+   zetteldeft-file-rename
+   zetteldeft-count-words
+   )
+  :init
 
 (map!
  :leader
  :prefix ("d" . "+deft")
- :desc "deft" "d" #'deft
- :desc "Browse deft directory" "B" (lambda () (interactive) (dired deft-directory))
- :desc "new file" "n" (lambda (str) (interactive (list (read-string "name: "))) (zetteldeft-new-file str t))
- :desc "insert id" "i" #'zetteldeft-find-file-id-insert
- :desc "insert id+title" "I" #'zetteldeft-find-file-full-title-insert
- :desc "follow link" "f" #'zetteldeft-follow-link
- "F" #'zetteldeft-avy-file-search-ace-window
- :desc "avy link search" "l" #'zetteldeft-avy-link-search)
- ;;:desc "new file+link" "N" '(zetteldeft-new-file-and-link t))
+
+ "d"  #'deft
+ "D"  #'zetteldeft-deft-new-search
+ "R"  #'deft-refresh
+ "s"  #'zetteldeft-search-at-point
+ "c"  #'zetteldeft-search-current-id
+ "f"  #'zetteldeft-follow-link
+ "F"  #'zetteldeft-avy-file-search-ace-window
+ "l"  #'zetteldeft-avy-link-search
+ "t"  #'zetteldeft-avy-tag-search
+ "T"  #'zetteldeft-tag-buffer
+ "i"  #'zetteldeft-find-file-id-insert
+ "I"  #'zetteldeft-find-file-full-title-insert
+ "o"  #'zetteldeft-find-file
+ "n"  #'zetteldeft-new-file
+ "N"  #'zetteldeft-new-file-and-link
+ "r"  #'zetteldeft-file-rename
+ "x"  #'zetteldeft-count-words
+ ;; :desc "deft" "d" #'deft
+ ;; :desc "Browse deft directory" "B" (lambda () (interactive) (dired deft-directory))
+ ;; :desc "new file" "n" (lambda (str) (interactive (list (read-string "name: "))) (zetteldeft-new-file str t))
+ ;; :desc "insert id" "i" #'zetteldeft-find-file-id-insert
+ ;; :desc "insert id+title" "I" #'zetteldeft-find-file-full-title-insert
+ ;; :desc "follow link" "f" #'zetteldeft-follow-link
+ ;; "F" #'zetteldeft-avy-file-search-ace-window
+ ;; :desc "avy link search" "l" #'zetteldeft-avy-link-search)
+  ))
+
+
+;;:desc "new file+link" "N" '(zetteldeft-new-file-and-link t))
 #+end_src
 
 
