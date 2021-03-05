@@ -51,6 +51,7 @@
 ;(package! builtin-package :recipe (:branch "develop"))
 
 (when (package! evil-org)
+
   (package! org-super-agenda))
 
 (package! org-ql)
@@ -58,4 +59,13 @@
 (package! outlookedit
   :recipe (:host github :repo "dholm/outlookedit"))
 
-(package! zetteldeft)
+;;;; Powershell
+(package! powershell)
+
+;; (package! zetteldeft)
+
+(package! selectrum)
+(package! selectrum-prescient)
+(package! consult)
+(package! embark)
+(package! marginalia)

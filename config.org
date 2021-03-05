@@ -14,7 +14,7 @@ Some functionality uses this to identify you, e.g. GPG configuration, email
 clients, file templates and snippets.
 #+begin_src emacs-lisp :tangle yes
 (setq user-full-name "Mathias Nielsen"
-      user-mail-address "john@doe.com")
+      user-mail-address "mnie@demant.com")
 
 ;;
 ;; + `doom-font'
@@ -30,7 +30,7 @@ clients, file templates and snippets.
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-;;(setq doom-theme 'doom-palenight)
+(setq doom-theme 'doom-nord)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -61,8 +61,20 @@ clients, file templates and snippets.
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
-(setq doom-localleader-key ","
-      doom-localleader-alt-key "M-,")
+(setq doom-localleader-key "SPC m"
+      doom-localleader-alt-key "M-SPC m")
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(defun doom/ediff-init-and-example ()
+  "ediff the current `init.el' with the example in doom-emacs-dir"
+  (interactive)
+  (ediff-files (concat doom-private-dir "init.el")
+               (concat doom-emacs-dir "init.example.el")))
+
+(define-key! help-map
+  "di"   #'doom/ediff-init-and-example
+  )
 #+end_src
 * Server mode
 
@@ -74,6 +86,7 @@ Add some bindings for server manipulation
  :desc "Start server" "s" 'server-start
  :desc "Edit server" "e" 'server-edit
  :desc "Delete server" "x" 'server-force-stop
+ :desc "Switch to *server* buffer" "b" '(lambda () (switch-to-buffer server-buffer))
  )
 #+end_src
 
@@ -82,6 +95,61 @@ Add hook to create new frame
 #+begin_src emacs-lisp :tangle yes
 (remove-hook 'server-visit-hook #'make-frame)
 #+end_src
+* Completion
+
+Using selectrum
+#+begin_src elisp
+
+(use-package! selectrum
+  :hook (after-init . selectrum-mode)
+  :init
+  (setq enable-recursive-minibuffers t)
+  :general
+  (:keymaps 'selectrum-minibuffer-map
+            :states '(normal insert)
+            "C-h" #'selectrum-previous-page
+            "C-l" #'selectrum-next-page
+            "C-j" #'selectrum-next-candidate
+            "C-k" #'selectrum-previous-candidate
+            "C-p" #'selectrum-previous-candidate
+            "C-n" #'selectrum-next-candidate
+            "C-s" #'selectrum-select-current-candidate)
+  (:states '(normal visual)
+           :keymaps 'global
+           "zs" #'selectrum-repeat))
+
+(use-package! embark
+  :defer t
+  :init
+  ;; (push '(("^[0-9-]\\|kp-[0-9]\\|kp-subtract\\|C-u$" . nil) . ignore)
+  ;;     which-key-replacement-alist)
+  :general
+  (:keymaps 'selectrum-minibuffer-map
+            "M-o" #'embark-act))
+
+(use-package! marginalia
+  :hook (selectrum-mode . marginalia-mode)
+  :init)
+
+(use-package! consult
+  ;; :straight (:host github :repo "minad/consult" :branch "main") ;
+  ;; :hook (selectrum-mode . consult-annotate-mode)
+  :general
+  ("C-s" #'consult-line)
+  (:states 'normal
+           "go" #'consult-outline))
+
+;; (use-package! consult-flycheck)
+
+(use-package! consult-selectrum)
+
+(use-package! prescient
+  :defer t)
+
+(use-package! selectrum-prescient
+  :hook (selectrum-mode . selectrum-prescient-mode))
+#+end_src
+
 * OSX
 
 #+begin_src emacs-lisp :tangle yes :results silent
@@ -99,8 +167,8 @@ Add hook to create new frame
 (pushnew! default-frame-alist '(height . 40) '(width . 128))
 #+end_src
 ** Theme
-#+begin_src emacs-lisp :tangle yes
-(load-theme 'doom-palenight)
+#+begin_src emacs-lisp :tangle no
+(load-theme 'doom-nord t nil)
 #+end_src
 * Evil
 ** Evil
@@ -150,7 +218,48 @@ Add hook to create new frame
  :desc "Edit" "e" #'mno-edit-outlook-message
  :desc "Save" "s" #'mno-put-outlook-message)
 #+end_src
-* Modes
+* Major Modes
+** Powershell
+Edit powershell files
+
+#+begin_src emacs-lisp :tangle yes
+(use-package! powershell
+  :mode ("\.ps[12]*" . powershell-mode)
+:hook (powershell-mode . lsp)
+:config
+(map! :map powershell-mode-map
+      :localleader
+"s" #'powershell))
+#+end_src
+** Python
+#+begin_src emacs-lisp :tangle yes
+(use-package! pyvenv
+  :hook (python-mode . pyvenv-mode)
+  :init
+  (add-to-list 'exec-path "~/.pyvenv/shims/")
+  ;; (with-eval-after-load 'flycheck
+  ;;   (setq flycheck-python-flake8-executable "python"
+  ;;         flycheck-python-mypy-executable "python"
+  ;;         flycheck-python-pycompile-executable "python"
+  ;;         flycheck-python-pylint-executable "python"))
+  ;; (setenv "WORKON_HOME" "~/.pyvenv/versions/")
+  (defun +pyvenv-create-or-activate ()
+    "Create or activate virtualenv in project-root."
+    (interactive)
+    (let ((workon_home (getenv "WORKON_HOME"))
+          (root (or (projectile-project-root)
+                    (directory-file-name default-directory)))
+          (venv-name "venv"))
+      (if (file-exists-p (format "%s/%s/Scripts" root venv-name))
+          (pyvenv-activate (format "%s/%s" root venv-name))
+        (progn
+          (message "Create virtual env")
+          (setenv "WORKON_HOME" root)
+          (pyvenv-create venv-name (executable-find "python"))
+          (pyvenv-activate (format "%s/%s" root venv-name))
+          (setenv "WORKON_HOME" workon_home))))))
+#+end_src
+
 ** nxml
 #+begin_src emacs-lisp :tangle yes
 (use-package! nxml-mode
@@ -200,24 +309,30 @@ Set todo keyword faces
 **** Priorities
 Set pritories ranging from A to D
 
-| Priority | Description                         |
-| A        | Tasks that are urgent and important |
-| B        |                                     |
-| C        |                                     |
-| D        |                                     |
+| Priority | Description                                            |
+|----------+--------------------------------------------------------|
+| A        | Tasks that are urgent and important         (Do)       |
+| B        | Tasks that are not urgent and important     (Defer)    |
+| C        | Tasks that are urgent and not important     (Delegate) |
+| D        | Tasks that are not urgent and not important (Delete)   |
 
 #+begin_src emacs-lisp :tangle yes
-(setq org-priority-highest ?A
-      org-priority-lowest ?D
-      org-priority-default ?B)
+(after! org
+ (setq org-priority-highest ?A
+       org-priority-lowest ?D
+       org-priority-default ?B
+       org-priority-faces '((?A . (:inherit 'error))
+			    (?B . (:inherit 'warning))
+			    (?C . (:inherit 'font-lock-string-face))
+			    (?D . (:inherit 'font-lock-comment-face
+                                   :italic t)))))
 #+end_src
 
 **** Effort
 #+begin_src emacs-lisp :tangle yes
 (after! org
-  (setq org-global-properties '(("Effort_ALL" . "0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00")
-                                "StoryPoints" . "1 2 3 5 8 13 20 40 100")
-        org-columns-default-format "%40ITEM(Task) %3StoryPoints(SP){:} %17Effort(Estimated Effort){:} %CLOCKSUM"))
+  (setq org-global-properties '(("Effort_ALL" . "0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00"))
+        org-columns-default-format "%40ITEM(Task) %17Effort(Estimated Effort){:} %CLOCKSUM"))
 #+end_src
 **** Capture templates
 #+begin_src emacs-lisp :tangle yes
@@ -241,7 +356,7 @@ Set pritories ranging from A to D
 (after! org
   (setq org-tag-alist '(
                         (:startgroup . nil)
-                        ("@localpc" . ?l) ("@devpc" . ?d) ("@rqm" . ?r) ("@emacs" . ?e)
+                        ("@localpc" . ?l) ("@devpc" . ?d) ("@kbn" . ?k)
                         (:endgroup .nil)
                         (:newline . nil)
                         ("project" . ?p) ("noexport" . ?n))))
@@ -253,28 +368,24 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
 
 #+begin_src emacs-lisp :tangle yes
 (after! org
-  (let* ((variable-tuple
-        (cond ((x-list-fonts "Source Sans Pro") '(:font "Source Sans Pro"))
-              ((x-list-fonts "Lucida Grande")   '(:font "Lucida Grande"))
-              ((x-list-fonts "Verdana")         '(:font "Verdana"))
-              ((x-family-fonts "Sans Serif")    '(:family "Sans Serif"))
-              (nil (warn "Cannot find a Sans Serif Font.  Install Source Sans Pro."))))
-       (base-font-color     (face-foreground 'default nil 'default))
-       (headline           `(:inherit default :weight normal :foreground ,base-font-color)))
+  (let* ((base-font-color     (face-foreground 'default nil 'default))
+         (headline           `(:inherit default :weight normal :foreground ,base-font-color)))
 
-  (custom-theme-set-faces
-   'user
-   `(org-link ((t (:foreground ,base-font-color :underline t))))
-   `(org-list-dt ((t (:foreground ,base-font-color :weight bold))))
-   `(org-level-8 ((t (,@headline))))
-   `(org-level-7 ((t (,@headline))))
-   `(org-level-6 ((t (,@headline))))
-   `(org-level-5 ((t (,@headline))))
-   `(org-level-4 ((t (,@headline :height 1.0))))
-   `(org-level-3 ((t (,@headline :height 1.0))))
-   `(org-level-2 ((t (,@headline :height 1.0))))
-   `(org-level-1 ((t (,@headline :height 1.2 :weight bold))))
-   `(org-document-title ((t (,@headline :height 1.5 :underline nil :weight bold)))))))
+    (custom-theme-set-faces
+     'user
+     `(org-link ((t (:foreground ,base-font-color :underline t))))
+     `(org-list-dt ((t (:foreground ,base-font-color :weight bold))))
+     `(org-level-8 ((t (,@headline))))
+     `(org-level-7 ((t (,@headline))))
+     `(org-level-6 ((t (,@headline))))
+     `(org-level-5 ((t (,@headline))))
+     `(org-level-4 ((t (,@headline :height 1.0))))
+     `(org-level-3 ((t (,@headline :height 1.0))))
+     `(org-level-2 ((t (,@headline :height 1.0))))
+     `(org-level-1 ((t (,@headline :height 1.2 :weight bold))))
+     `(org-document-title ((t (,@headline :height 1.5 :underline nil :weight bold))))
+     ;; org-agenda-faces
+     `(org-agenda-structure ((t (,@headline :height 1.2 :weight semi-bold :family "Segoe UI")))))))
 #+end_src
 
 **** Org-bullets
@@ -317,9 +428,67 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
         org-agenda-use-tag-inheritance nil)
 
 #+end_src
+**** Agenda Files
 
+
+#+begin_src emacs-lisp :tangle no
+(defun +org-notes-project-p ()
+  "Return non-nil if current buffer has any todo entry.
+TODO entries marked as done are ignored, meaning the this
+function returns nil if current buffer contains only completed
+tasks."
+  (seq-find                                 ; (3)
+   (lambda (type)
+     (eq type 'todo))
+   (org-element-map                         ; (2)
+       (org-element-parse-buffer 'headline) ; (1)
+       'headline
+     (lambda (h)
+       (org-element-property :todo-type h)))))
+
+(defun +org-notes-project-update-tag ()
+  "Update PROJECT tag in the current buffer."
+  (when (and (not (active-minibuffer-window))
+             (+org-notes-buffer-p))
+    (let* ((file (buffer-file-name (buffer-base-buffer)))
+           (all-tags (org-roam--extract-tags file))
+           (prop-tags (org-roam--extract-tags-prop file))
+           (tags prop-tags))
+      (if (+org-notes-project-p)
+          (setq tags (cons "Project" tags))
+        (setq tags (remove "Project" tags)))
+      (unless (eq prop-tags tags)
+        (org-roam--set-global-prop
+         "ROAM_TAGS"
+         (combine-and-quote-strings (seq-uniq tags)))))))
+
+(defun +org-notes-buffer-p ()
+  "Return non-nil if the currently visited buffer is a note."
+  (and buffer-file-name
+       (string-prefix-p
+        (expand-file-name (file-name-as-directory org-roam-directory))
+        (file-name-directory buffer-file-name))))
+
+(defun +org-notes-project-files ()
+  "Return a list of note files containing Project tag."
+  (seq-map
+   #'car
+   (org-roam-db-query
+    [:select file
+     :from tags
+     :where (like tags (quote "%\"Project\"%"))])))
+
+(defun +agenda-files-update (&rest _)
+  "Update the value of `org-agenda-files'."
+  (setq org-agenda-files (+org-notes-project-files)))
+
+(add-hook 'find-file-hook #'+org-notes-project-update-tag)
+(add-hook 'before-save-hook #'+org-notes-project-update-tag)
+
+(advice-add 'org-agenda :before #'+agenda-files-update)
+#+end_src
 **** Super Agenda
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (use-package! org-super-agenda
   :defer t
   :after evil-org
@@ -344,10 +513,11 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
 ***** Next Actions list :gtd:
 #+begin_src emacs-lisp :tangle yes
 (+mnie/add-org-agenda-custom-commands
-               '("n" "Next Actions"
+               `("n" "Next Actions"
                   ((agenda "" ((org-agenda-overriding-header "Today")
                                (org-agenda-start-day nil)
-                               (org-agenda-span 'day)))
+                               (org-agenda-span 'day)
+                               (org-agenda-files (quote ,(mapcar (lambda (f) (concat org-directory f)) '("gtd.org" "tickler.org"))))))
                    (alltodo "" ((org-agenda-overriding-header "On-going Tasks")
                                                  (org-agenda-skip-function '(or (org-agenda-skip-entry-if 'todo '("WAITING"))
                                                                                 (org-agenda-skip-subtree-if 'todo '("ON-HOLD"))
@@ -368,7 +538,7 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
 (+mnie/add-org-agenda-custom-commands  '("c" . "Contexts")
                                        '("cl" "@localpc" tags-todo "@localpc")
                                        '("cd" "@devpc" tags-todo "@devpc")
-                                       '("cr" "@rqm" tags-todo "@rqm")
+                                       '("ck" "@kbn" tags-todo "@kbn")
                                        '("ce" "@emacs" tags-todo "@emacs"))
 #+end_src
 ***** Review :gtd:
@@ -406,10 +576,10 @@ Setup agenda view to only show category icon
 
 #+BEGIN_SRC emacs-lisp :tangle yes
 (after! org
-  (setq org-agenda-prefix-format '((agenda . " %-1i %?-12t% s")
-                                (todo . " %-1i %4(or (org-entry-get (point) \"CLOCKSUM\" t) \"0:00\") / %4e ")
-                                (tags . " %-1i %4(or (org-entry-get (point) \"CLOCKSUM\" t) \"0:00\") / %4e ")
-                                (search . " %-1i ")))
+  (setq org-agenda-prefix-format '((agenda . " %-1i %-12c %?-12t% s")
+                                (todo . " %-1i %-12c ")
+                                (tags . " %-1i  %-12c")
+                                (search . " %-1i  %-12c ")))
 
   (setq org-agenda-category-icon-alist
       `(
@@ -452,12 +622,19 @@ Setup agenda view to only show category icon
                                    :publishing-function org-pandoc-export-to-docx
                                    )))
 #+end_src
+** Org Roam
+#+begin_src emacs-lisp :tangle yes
+(use-package! org-roam
+  :defer t
+  :init
+  (setq org-roam-db-update-method 'immediate))
+#+end_src
 ** deft
 #+begin_src emacs-lisp :tangle yes
 (use-package! deft
   :defer t
   :init
-  (setq deft-directory "~/.deft/"
+  (setq deft-directory org-roam-directory
         deft-use-filter-string-for-filename nil
         deft-use-filename-as-title nil)
   (advice-add #'deft-complete :after '(lambda () (kill-buffer "*Deft*")))
@@ -466,87 +643,6 @@ Setup agenda view to only show category icon
    :i "C-j" #'evil-next-line
    :i "C-k" #'evil-previous-line))
 #+end_src
-** Zetteldeft
-
-| Key     | Function                               |
-|---------+----------------------------------------|
-| C-c d d | deft                                   |
-| C-c d D | zetteldeft-deft-new-search             |
-| C-c d R | deft-refresh                           |
-| C-c d s | zetteldeft-search-at-point             |
-| C-c d c | zetteldeft-search-current-id           |
-| C-c d f | zetteldeft-follow-link                 |
-| C-c d F | zetteldeft-avy-file-search-ace-window  |
-| C-c d l | zetteldeft-avy-link-search             |
-| C-c d t | zetteldeft-avy-tag-search              |
-| C-c d T | zetteldeft-tag-buffer                  |
-| C-c d i | zetteldeft-find-file-id-insert         |
-| C-c d I | zetteldeft-find-file-full-title-insert |
-| C-c d o | zetteldeft-find-file                   |
-| C-c d n | zetteldeft-new-file                    |
-| C-c d N | zetteldeft-new-file-and-link           |
-| C-c d r | zetteldeft-file-rename                 |
-| C-c d x | zetteldeft-count-words                 |
-
-#+begin_src emacs-lisp :tangle yes
-
-(use-package! zetteldeft
-  :defer t
-  :commands
-  (
-   zetteldeft-deft-new-search
-   zetteldeft-search-at-point
-   zetteldeft-search-current-id
-   zetteldeft-follow-link
-   zetteldeft-avy-file-search-ace-window
-   zetteldeft-avy-link-search
-   zetteldeft-avy-tag-search
-   zetteldeft-tag-buffer
-   zetteldeft-find-file-id-insert
-   zetteldeft-find-file-full-title-insert
-   zetteldeft-find-file
-   zetteldeft-new-file
-   zetteldeft-new-file-and-link
-   zetteldeft-file-rename
-   zetteldeft-count-words
-   )
-  :init
-
-(map!
- :leader
- :prefix ("d" . "+deft")
-
- "d"  #'deft
- "D"  #'zetteldeft-deft-new-search
- "R"  #'deft-refresh
- "s"  #'zetteldeft-search-at-point
- "c"  #'zetteldeft-search-current-id
- "f"  #'zetteldeft-follow-link
- "F"  #'zetteldeft-avy-file-search-ace-window
- "l"  #'zetteldeft-avy-link-search
- "t"  #'zetteldeft-avy-tag-search
- "T"  #'zetteldeft-tag-buffer
- "i"  #'zetteldeft-find-file-id-insert
- "I"  #'zetteldeft-find-file-full-title-insert
- "o"  #'zetteldeft-find-file
- "n"  #'zetteldeft-new-file
- "N"  #'zetteldeft-new-file-and-link
- "r"  #'zetteldeft-file-rename
- "x"  #'zetteldeft-count-words
- ;; :desc "deft" "d" #'deft
- ;; :desc "Browse deft directory" "B" (lambda () (interactive) (dired deft-directory))
- ;; :desc "new file" "n" (lambda (str) (interactive (list (read-string "name: "))) (zetteldeft-new-file str t))
- ;; :desc "insert id" "i" #'zetteldeft-find-file-id-insert
- ;; :desc "insert id+title" "I" #'zetteldeft-find-file-full-title-insert
- ;; :desc "follow link" "f" #'zetteldeft-follow-link
- ;; "F" #'zetteldeft-avy-file-search-ace-window
- ;; :desc "avy link search" "l" #'zetteldeft-avy-link-search)
-  ))
-
-
-;;:desc "new file+link" "N" '(zetteldeft-new-file-and-link t))
-#+end_src
-
 
 ** Plantuml
 #+begin_src emacs-lisp :tangle yes
@@ -554,7 +650,7 @@ Setup agenda view to only show category icon
   :defer t
   :init
   (setq plantuml-default-exec-mode 'jar
-        plantuml-jar-path "~/bin/plantuml.jar"))
+        plantuml-jar-path (expand-file-name "~/bin/plantuml.jar")))
 #+end_src
 ** Misc
 *** open .err-files as text-mode

@@ -1,7 +1,7 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
 (setq user-full-name "Mathias Nielsen"
-      user-mail-address "john@doe.com")
+      user-mail-address "mnie@demant.com")
 
 ;;
 ;; + `doom-font'
@@ -17,7 +17,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-;;(setq doom-theme 'doom-palenight)
+(setq doom-theme 'doom-nord)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -45,8 +45,18 @@
 ;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
 ;; they are implemented.
 
-(setq doom-localleader-key ","
-      doom-localleader-alt-key "M-,")
+(setq doom-localleader-key "SPC m"
+      doom-localleader-alt-key "M-SPC m")
+
+(defun doom/ediff-init-and-example ()
+  "ediff the current `init.el' with the example in doom-emacs-dir"
+  (interactive)
+  (ediff-files (concat doom-private-dir "init.el")
+               (concat doom-emacs-dir "init.example.el")))
+
+(define-key! help-map
+  "di"   #'doom/ediff-init-and-example
+  )
 
 (map!
  :leader
@@ -54,6 +64,7 @@
  :desc "Start server" "s" 'server-start
  :desc "Edit server" "e" 'server-edit
  :desc "Delete server" "x" 'server-force-stop
+ :desc "Switch to *server* buffer" "b" '(lambda () (switch-to-buffer server-buffer))
  )
 
 (remove-hook 'server-visit-hook #'make-frame)
@@ -66,8 +77,6 @@
 )
 
 (pushnew! default-frame-alist '(height . 40) '(width . 128))
-
-(load-theme 'doom-palenight)
 
 (map!
  :after evil
@@ -103,6 +112,40 @@
  :desc "Edit" "e" #'mno-edit-outlook-message
  :desc "Save" "s" #'mno-put-outlook-message)
 
+(use-package! powershell
+  :mode ("\.ps[12]*" . powershell-mode)
+:hook (powershell-mode . lsp)
+:config
+(map! :map powershell-mode-map
+      :localleader
+"s" #'powershell))
+
+(use-package! pyvenv
+  :hook (python-mode . pyvenv-mode)
+  :init
+  (add-to-list 'exec-path "~/.pyvenv/shims/")
+  ;; (with-eval-after-load 'flycheck
+  ;;   (setq flycheck-python-flake8-executable "python"
+  ;;         flycheck-python-mypy-executable "python"
+  ;;         flycheck-python-pycompile-executable "python"
+  ;;         flycheck-python-pylint-executable "python"))
+  ;; (setenv "WORKON_HOME" "~/.pyvenv/versions/")
+  (defun +pyvenv-create-or-activate ()
+    "Create or activate virtualenv in project-root."
+    (interactive)
+    (let ((workon_home (getenv "WORKON_HOME"))
+          (root (or (projectile-project-root)
+                    (directory-file-name default-directory)))
+          (venv-name "venv"))
+      (if (file-exists-p (format "%s/%s/Scripts" root venv-name))
+          (pyvenv-activate (format "%s/%s" root venv-name))
+        (progn
+          (message "Create virtual env")
+          (setenv "WORKON_HOME" root)
+          (pyvenv-create venv-name (executable-find "python"))
+          (pyvenv-activate (format "%s/%s" root venv-name))
+          (setenv "WORKON_HOME" workon_home))))))
+
 (use-package! nxml-mode
   :defer t
   :mode ("\\.xml$" . nxml-mode)
@@ -136,14 +179,19 @@
       (("COMPLETED" "DONE") . (t (:inherit org-done :strike-through t)))
       ("ON-HOLD" . "orange"))))
 
-(setq org-priority-highest ?A
-      org-priority-lowest ?D
-      org-priority-default ?B)
+(after! org
+ (setq org-priority-highest ?A
+       org-priority-lowest ?D
+       org-priority-default ?B
+       org-priority-faces '((?A . (:inherit 'error))
+			    (?B . (:inherit 'warning))
+			    (?C . (:inherit 'font-lock-string-face))
+			    (?D . (:inherit 'font-lock-comment-face
+                                   :italic t)))))
 
 (after! org
-  (setq org-global-properties '(("Effort_ALL" . "0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00")
-                                "StoryPoints" . "1 2 3 5 8 13 20 40 100")
-        org-columns-default-format "%40ITEM(Task) %3StoryPoints(SP){:} %17Effort(Estimated Effort){:} %CLOCKSUM"))
+  (setq org-global-properties '(("Effort_ALL" . "0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00"))
+        org-columns-default-format "%40ITEM(Task) %17Effort(Estimated Effort){:} %CLOCKSUM"))
 
 (after! org
   (setq org-capture-templates
@@ -163,34 +211,30 @@
 (after! org
   (setq org-tag-alist '(
                         (:startgroup . nil)
-                        ("@localpc" . ?l) ("@devpc" . ?d) ("@rqm" . ?r) ("@emacs" . ?e)
+                        ("@localpc" . ?l) ("@devpc" . ?d) ("@kbn" . ?k)
                         (:endgroup .nil)
                         (:newline . nil)
                         ("project" . ?p) ("noexport" . ?n))))
 
 (after! org
-  (let* ((variable-tuple
-        (cond ((x-list-fonts "Source Sans Pro") '(:font "Source Sans Pro"))
-              ((x-list-fonts "Lucida Grande")   '(:font "Lucida Grande"))
-              ((x-list-fonts "Verdana")         '(:font "Verdana"))
-              ((x-family-fonts "Sans Serif")    '(:family "Sans Serif"))
-              (nil (warn "Cannot find a Sans Serif Font.  Install Source Sans Pro."))))
-       (base-font-color     (face-foreground 'default nil 'default))
-       (headline           `(:inherit default :weight normal :foreground ,base-font-color)))
+  (let* ((base-font-color     (face-foreground 'default nil 'default))
+         (headline           `(:inherit default :weight normal :foreground ,base-font-color)))
 
-  (custom-theme-set-faces
-   'user
-   `(org-link ((t (:foreground ,base-font-color :underline t))))
-   `(org-list-dt ((t (:foreground ,base-font-color :weight bold))))
-   `(org-level-8 ((t (,@headline))))
-   `(org-level-7 ((t (,@headline))))
-   `(org-level-6 ((t (,@headline))))
-   `(org-level-5 ((t (,@headline))))
-   `(org-level-4 ((t (,@headline :height 1.0))))
-   `(org-level-3 ((t (,@headline :height 1.0))))
-   `(org-level-2 ((t (,@headline :height 1.0))))
-   `(org-level-1 ((t (,@headline :height 1.2 :weight bold))))
-   `(org-document-title ((t (,@headline :height 1.5 :underline nil :weight bold)))))))
+    (custom-theme-set-faces
+     'user
+     `(org-link ((t (:foreground ,base-font-color :underline t))))
+     `(org-list-dt ((t (:foreground ,base-font-color :weight bold))))
+     `(org-level-8 ((t (,@headline))))
+     `(org-level-7 ((t (,@headline))))
+     `(org-level-6 ((t (,@headline))))
+     `(org-level-5 ((t (,@headline))))
+     `(org-level-4 ((t (,@headline :height 1.0))))
+     `(org-level-3 ((t (,@headline :height 1.0))))
+     `(org-level-2 ((t (,@headline :height 1.0))))
+     `(org-level-1 ((t (,@headline :height 1.2 :weight bold))))
+     `(org-document-title ((t (,@headline :height 1.5 :underline nil :weight bold))))
+     ;; org-agenda-faces
+     `(org-agenda-structure ((t (,@headline :height 1.2 :weight semi-bold :family "Segoe UI")))))))
 
 (use-package! org-superstar
   :defer t)
@@ -220,12 +264,6 @@
         org-use-tag-inheritance nil
         org-agenda-use-tag-inheritance nil)
 
-(use-package! org-super-agenda
-  :defer t
-  :after evil-org
-  :config
-  (add-hook 'evil-org-agenda-mode-hook #'org-super-agenda-mode))
-
 (after! org
   (setq org-agenda-custom-commands nil))
 
@@ -236,9 +274,11 @@
        (after! org (add-to-list 'org-agenda-custom-commands ,var)))))
 
 (+mnie/add-org-agenda-custom-commands
-               '("n" "Next Actions"
+               `("n" "Next Actions"
                   ((agenda "" ((org-agenda-overriding-header "Today")
-                               (org-agenda-span 'day)))
+                               (org-agenda-start-day nil)
+                               (org-agenda-span 'day)
+                               (org-agenda-files (quote ,(mapcar (lambda (f) (concat org-directory f)) '("gtd.org" "tickler.org"))))))
                    (alltodo "" ((org-agenda-overriding-header "On-going Tasks")
                                                  (org-agenda-skip-function '(or (org-agenda-skip-entry-if 'todo '("WAITING"))
                                                                                 (org-agenda-skip-subtree-if 'todo '("ON-HOLD"))
@@ -257,7 +297,7 @@
 (+mnie/add-org-agenda-custom-commands  '("c" . "Contexts")
                                        '("cl" "@localpc" tags-todo "@localpc")
                                        '("cd" "@devpc" tags-todo "@devpc")
-                                       '("cr" "@rqm" tags-todo "@rqm")
+                                       '("ck" "@kbn" tags-todo "@kbn")
                                        '("ce" "@emacs" tags-todo "@emacs"))
 
 (after! org
@@ -274,10 +314,10 @@
                   (tags-todo "refine" ((org-agenda-overriding-header "Refine")))))))
 
 (after! org
-  (setq org-agenda-prefix-format '((agenda . " %-1i %?-12t% s")
-                                (todo . " %-1i %4(or (org-entry-get (point) \"CLOCKSUM\") \"0:00\") / %4e ")
-                                (tags . " %-1i %4(or (org-entry-get (point) \"CLOCKSUM\") \"0:00\") / %4e ")
-                                (search . " %-1i ")))
+  (setq org-agenda-prefix-format '((agenda . " %-1i %-12c %?-12t% s")
+                                (todo . " %-1i %-12c ")
+                                (tags . " %-1i  %-12c")
+                                (search . " %-1i  %-12c ")))
 
   (setq org-agenda-category-icon-alist
       `(
@@ -315,10 +355,15 @@
                                    :publishing-function org-pandoc-export-to-docx
                                    )))
 
+(use-package! org-roam
+  :defer t
+  :init
+  (setq org-roam-db-update-method 'immediate))
+
 (use-package! deft
   :defer t
   :init
-  (setq deft-directory "~/.deft/"
+  (setq deft-directory org-roam-directory
         deft-use-filter-string-for-filename nil
         deft-use-filename-as-title nil)
   (advice-add #'deft-complete :after '(lambda () (kill-buffer "*Deft*")))
@@ -327,67 +372,60 @@
    :i "C-j" #'evil-next-line
    :i "C-k" #'evil-previous-line))
 
-(use-package! zetteldeft
-  :defer t
-  :commands
-  (
-   zetteldeft-deft-new-search
-   zetteldeft-search-at-point
-   zetteldeft-search-current-id
-   zetteldeft-follow-link
-   zetteldeft-avy-file-search-ace-window
-   zetteldeft-avy-link-search
-   zetteldeft-avy-tag-search
-   zetteldeft-tag-buffer
-   zetteldeft-find-file-id-insert
-   zetteldeft-find-file-full-title-insert
-   zetteldeft-find-file
-   zetteldeft-new-file
-   zetteldeft-new-file-and-link
-   zetteldeft-file-rename
-   zetteldeft-count-words
-   )
-  :init
-
-(map!
- :leader
- :prefix ("d" . "+deft")
-
- "d"  #'deft
- "D"  #'zetteldeft-deft-new-search
- "R"  #'deft-refresh
- "s"  #'zetteldeft-search-at-point
- "c"  #'zetteldeft-search-current-id
- "f"  #'zetteldeft-follow-link
- "F"  #'zetteldeft-avy-file-search-ace-window
- "l"  #'zetteldeft-avy-link-search
- "t"  #'zetteldeft-avy-tag-search
- "T"  #'zetteldeft-tag-buffer
- "i"  #'zetteldeft-find-file-id-insert
- "I"  #'zetteldeft-find-file-full-title-insert
- "o"  #'zetteldeft-find-file
- "n"  #'zetteldeft-new-file
- "N"  #'zetteldeft-new-file-and-link
- "r"  #'zetteldeft-file-rename
- "x"  #'zetteldeft-count-words
- ;; :desc "deft" "d" #'deft
- ;; :desc "Browse deft directory" "B" (lambda () (interactive) (dired deft-directory))
- ;; :desc "new file" "n" (lambda (str) (interactive (list (read-string "name: "))) (zetteldeft-new-file str t))
- ;; :desc "insert id" "i" #'zetteldeft-find-file-id-insert
- ;; :desc "insert id+title" "I" #'zetteldeft-find-file-full-title-insert
- ;; :desc "follow link" "f" #'zetteldeft-follow-link
- ;; "F" #'zetteldeft-avy-file-search-ace-window
- ;; :desc "avy link search" "l" #'zetteldeft-avy-link-search)
-  ))
-
-
-;;:desc "new file+link" "N" '(zetteldeft-new-file-and-link t))
-
 (use-package! plantuml-mode
   :defer t
   :init
   (setq plantuml-default-exec-mode 'jar
-        plantuml-jar-path "~/bin/plantuml.jar"))
+        plantuml-jar-path (expand-file-name "~/bin/plantuml.jar")))
 
 (add-to-list 'auto-mode-alist '("\\.err$" . text-mode))
 (add-to-list 'auto-mode-alist '("\\.out$" . text-mode))
+
+(use-package! selectrum
+  :hook (after-init . selectrum-mode)
+  :init
+  (setq enable-recursive-minibuffers t)
+  :general
+  (:keymaps 'selectrum-minibuffer-map
+            :states '(normal insert)
+            "C-h" #'selectrum-previous-page
+            "C-l" #'selectrum-next-page
+            "C-j" #'selectrum-next-candidate
+            "C-k" #'selectrum-previous-candidate
+            "C-p" #'selectrum-previous-candidate
+            "C-n" #'selectrum-next-candidate
+            "C-s" #'selectrum-select-current-candidate)
+  (:states '(normal visual)
+           :keymaps 'global
+           "zs" #'selectrum-repeat))
+
+(use-package! embark
+  :defer t
+  :init
+  ;; (push '(("^[0-9-]\\|kp-[0-9]\\|kp-subtract\\|C-u$" . nil) . ignore)
+  ;;     which-key-replacement-alist)
+  :general
+  (:keymaps 'selectrum-minibuffer-map
+            "M-o" #'embark-act))
+
+(use-package! marginalia
+  :hook (selectrum-mode . marginalia-mode)
+  :init)
+
+(use-package! consult
+  ;; :straight (:host github :repo "minad/consult" :branch "main") ;
+  ;; :hook (selectrum-mode . consult-annotate-mode)
+  :general
+  ("C-s" #'consult-line)
+  (:states 'normal
+           "go" #'consult-outline))
+
+;; (use-package! consult-flycheck)
+
+(use-package! consult-selectrum)
+
+(use-package! prescient
+  :defer t)
+
+(use-package! selectrum-prescient
+  :hook (selectrum-mode . selectrum-prescient-mode))
