@@ -1,0 +1,22 @@
+# -*- mode: snippet -*-
+# name: Test Function
+# key: TOQ
+# --
+function Test_`(yas-selected-text)`(obj)
+%TEST_`(upcase (yas-selected-text))` Summary of this function goes here
+% Detailed Description
+%
+% [Syntax]
+%    Test_`(yas-selected-text)`(obj)
+%
+% [Input]
+%
+% [Example]
+%
+%
+% [See also]
+%
+
+
+end
+$0

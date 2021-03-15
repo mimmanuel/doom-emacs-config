@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: mandatory
+# key: mand
+# --
+[Parameter(Mandatory=\$${1:true})]$0

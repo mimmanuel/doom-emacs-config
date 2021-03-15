@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: properties
+# key: properties
+# --
+properties ${1:(Access = ${2:private})}
+   $0
+end

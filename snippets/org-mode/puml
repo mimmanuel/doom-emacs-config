@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: puml
+# key: puml
+# --
+#+begin_src plantuml :file $1
+$0
+#+end_src

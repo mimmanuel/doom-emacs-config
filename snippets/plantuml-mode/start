@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: start act
+# key: start
+# --
+start
+$0
+end

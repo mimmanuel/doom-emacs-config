@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: activity diagram
+# key: activity
+# --
+start
+$0
+end

@@ -1,0 +1,18 @@
+# -*- mode: snippet -*-
+# name: classdef
+# key: classdef
+# --
+classdef ${1:$$(file-name-base (buffer-file-name))}${2: < ${3:handle}}
+    %${1:$(upcase yas-text)}
+
+    properties
+        $4
+    end
+
+    methods
+        function obj = $1($5)
+            ${6:obj = obj@$3($5);
+	    }$0
+        end
+    end
+end

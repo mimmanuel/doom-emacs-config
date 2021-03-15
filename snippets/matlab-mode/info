@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: info
+# --
+% ${1:Description}
+%
+% [Syntax]
+%   ${2:Syntax}
+%
+% [Input]
+%   ${3:${4:var} \{${5:type}\}: ${6:DESCRIPTION}}
+%
+%
+% [Example]
+%
+%
+% [See also]
+%
+
+$0

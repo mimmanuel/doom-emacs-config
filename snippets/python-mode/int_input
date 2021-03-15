@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: int input
+# key: ii
+# --
+${1:var} = int(input(${2:input}))
+$0

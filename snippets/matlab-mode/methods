@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: methods
+# key: methods
+# --
+methods ${1:(${2:$$(yas-choose-value '("Access = private" "Access = public"))})}
+     $0
+end

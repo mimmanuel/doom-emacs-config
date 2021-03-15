@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: function
+# key: function
+# --
+Function ${1:VerbNoun} {
+${2:
+Param(
+${3:\$ParameterName}
+)
+}
+$0
+}

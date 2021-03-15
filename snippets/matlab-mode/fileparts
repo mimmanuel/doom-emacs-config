@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: fileparts
+# key: fileparts
+# --
+[filepath, name, ext] = fileparts($0);

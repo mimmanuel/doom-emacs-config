@@ -1,0 +1,23 @@
+# -*- mode: snippet -*-
+# name: function defining
+# key: function
+# --
+function ${1:[$2] = }${3:`(file-name-sans-extension (file-name-nondirectory (buffer-file-name)))`}(${4:input_arg})
+%${3:$(upcase yas-text)} Summary of this function goes here
+% Detailed Description
+%
+% [Syntax]
+%    $1$3($4)
+%
+% [Input]
+${4:$(ignore-errors (mapconcat (lambda (s) (format "%%   %s \{type\}: DESCRIPTION" s)) (mapcar #'string-trim (split-string (yas-text) ",")) "\n"))}
+%
+%
+% [Example]
+%
+%
+% [See also]
+%
+
+    $0
+end
