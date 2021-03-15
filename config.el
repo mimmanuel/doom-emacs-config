@@ -165,7 +165,7 @@
 
 (after! org
   (setq org-todo-keywords
-      '((sequence "TODO(t)" "STARTED(s!)" "|" "DONE(d!)")
+      '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
         (sequence "WAITING(w!)" "|")
         (sequence "|" "CANCELLED(C!)")
         (sequence "ACTIVE(a)" "ON-HOLD(h@!)" "|" "COMPLETED(c!)")))
@@ -178,16 +178,6 @@
       ;;("STARTED" . (t (:inherit org-todo :foreground "green")))
       (("COMPLETED" "DONE") . (t (:inherit org-done :strike-through t)))
       ("ON-HOLD" . "orange"))))
-
-(after! org
- (setq org-priority-highest ?A
-       org-priority-lowest ?D
-       org-priority-default ?B
-       org-priority-faces '((?A . (:inherit 'error))
-			    (?B . (:inherit 'warning))
-			    (?C . (:inherit 'font-lock-string-face))
-			    (?D . (:inherit 'font-lock-comment-face
-                                   :italic t)))))
 
 (after! org
   (setq org-global-properties '(("Effort_ALL" . "0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00"))
@@ -250,8 +240,6 @@
   (setq org-stuck-projects '("+PROJECT" ("TODO" "NEXT") nil ""))
 
   (setq org-agenda-window-setup 'current-window)
-  ;;(add-hook 'evil-org-agenda-mode-hook #'org-super-agenda-mode)
-  ;;(setq org-super-agenda-header-map (make-sparse-keymap))
 
   (setq org-agenda-start-on-weekday nil
         org-agenda-span 10
@@ -263,6 +251,61 @@
         org-agenda-dim-blocked-tasks nil
         org-use-tag-inheritance nil
         org-agenda-use-tag-inheritance nil)
+
+(defun +org-notes-project-p ()
+  "Return non-nil if current buffer has any todo entry.
+TODO entries marked as done are ignored, meaning the this
+function returns nil if current buffer contains only completed
+tasks."
+  (seq-find                                 ; (3)
+   (lambda (type)
+     (eq type 'todo))
+   (org-element-map                         ; (2)
+       (org-element-parse-buffer 'headline) ; (1)
+       'headline
+     (lambda (h)
+       (org-element-property :todo-type h)))))
+
+(defun +org-notes-project-update-tag ()
+  "Update PROJECT tag in the current buffer."
+  (when (and (not (active-minibuffer-window))
+             (+org-notes-buffer-p))
+    (let* ((file (buffer-file-name (buffer-base-buffer)))
+           (all-tags (org-roam--extract-tags file))
+           (prop-tags (org-roam--extract-tags-prop file))
+           (tags prop-tags))
+      (if (+org-notes-project-p)
+          (setq tags (cons "Project" tags))
+        (setq tags (remove "Project" tags)))
+      (unless (eq prop-tags tags)
+        (org-roam--set-global-prop
+         "ROAM_TAGS"
+         (combine-and-quote-strings (seq-uniq tags)))))))
+
+(defun +org-notes-buffer-p ()
+  "Return non-nil if the currently visited buffer is a note."
+  (and buffer-file-name
+       (string-prefix-p
+        (expand-file-name (file-name-as-directory org-roam-directory))
+        (file-name-directory buffer-file-name))))
+
+(defun +org-notes-project-files ()
+  "Return a list of note files containing Project tag."
+   (seq-map
+   #'car
+   (org-roam-db-query
+    [:select file
+     :from tags
+     :where (like tags (quote "%\"Project\"%"))])))
+
+(defun +agenda-files-update (&rest _)
+  "Update the value of `org-agenda-files'."
+  (setq org-agenda-files (+org-notes-project-files)))
+
+(add-hook 'find-file-hook #'+org-notes-project-update-tag)
+(add-hook 'before-save-hook #'+org-notes-project-update-tag)
+
+(advice-add 'org-agenda :before #'+agenda-files-update)
 
 (after! org
   (setq org-agenda-custom-commands nil))
@@ -381,6 +424,22 @@
 (add-to-list 'auto-mode-alist '("\\.err$" . text-mode))
 (add-to-list 'auto-mode-alist '("\\.out$" . text-mode))
 
+(use-package! company
+  :defer t
+  :config
+  (setq company-minimum-prefix-length 1
+        company-show-numbers t))
+
+(use-package! projectile
+  :defer t
+  :init
+  (defun mnie/switch-project ()
+    "Switch project and create new workspace."
+    (+workspaces-set-project-action-fn)
+    (+workspaces-switch-to-project-h))
+  :config
+  (setq projectile-switch-project-action #'mnie/switch-project))
+
 (use-package! selectrum
   :hook (after-init . selectrum-mode)
   :init
@@ -415,6 +474,20 @@
 (use-package! consult
   ;; :straight (:host github :repo "minad/consult" :branch "main") ;
   ;; :hook (selectrum-mode . consult-annotate-mode)
+
+  :init
+  (defun +consult-ripgrep-project (start end)
+    "Use consult-ripgrep to search from project root."
+    (interactive "r")
+    (let* ((initial-text (if (region-active-p)
+                             (buffer-substring-no-properties start end)
+                           "")))
+      (if (projectile-project-p)
+        (consult-ripgrep (projectile-project-root) initial-text)
+      (message "Not in project."))))
+  (map! :leader
+       (:prefix "s"
+        :desc "Search project" "p" #'+consult-ripgrep-project))
   :general
   ("C-s" #'consult-line)
   (:states 'normal

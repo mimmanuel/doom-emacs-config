@@ -97,6 +97,7 @@ Add hook to create new frame
 #+end_src
 * Completion
 
+** Selectrum
 Using selectrum
 #+begin_src elisp
 
@@ -134,6 +135,20 @@ Using selectrum
 (use-package! consult
   ;; :straight (:host github :repo "minad/consult" :branch "main") ;
   ;; :hook (selectrum-mode . consult-annotate-mode)
+
+  :init
+  (defun +consult-ripgrep-project (start end)
+    "Use consult-ripgrep to search from project root."
+    (interactive "r")
+    (let* ((initial-text (if (region-active-p)
+                             (buffer-substring-no-properties start end)
+                           "")))
+      (if (projectile-project-p)
+        (consult-ripgrep (projectile-project-root) initial-text)
+      (message "Not in project."))))
+  (map! :leader
+       (:prefix "s"
+        :desc "Search project" "p" #'+consult-ripgrep-project))
   :general
   ("C-s" #'consult-line)
   (:states 'normal
@@ -288,7 +303,7 @@ Edit powershell files
 #+begin_src emacs-lisp :tangle yes
 (after! org
   (setq org-todo-keywords
-      '((sequence "TODO(t)" "STARTED(s!)" "|" "DONE(d!)")
+      '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
         (sequence "WAITING(w!)" "|")
         (sequence "|" "CANCELLED(C!)")
         (sequence "ACTIVE(a)" "ON-HOLD(h@!)" "|" "COMPLETED(c!)")))
@@ -316,16 +331,17 @@ Set pritories ranging from A to D
 | C        | Tasks that are urgent and not important     (Delegate) |
 | D        | Tasks that are not urgent and not important (Delete)   |
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (after! org
  (setq org-priority-highest ?A
        org-priority-lowest ?D
        org-priority-default ?B
-       org-priority-faces '((?A . (:inherit 'error))
-			    (?B . (:inherit 'warning))
-			    (?C . (:inherit 'font-lock-string-face))
-			    (?D . (:inherit 'font-lock-comment-face
-                                   :italic t)))))
+       ;; org-priority-faces '((?A . (:inherit 'error))
+       ;;  		    (?B . (:inherit 'warning))
+       ;;  		    (?C . (:inherit 'font-lock-string-face))
+       ;;  		    (?D . (:inherit 'font-lock-comment-face
+       ;;                             :italic t)))
+       ))
 #+end_src
 
 **** Effort
@@ -413,8 +429,6 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
   (setq org-stuck-projects '("+PROJECT" ("TODO" "NEXT") nil ""))
 
   (setq org-agenda-window-setup 'current-window)
-  ;;(add-hook 'evil-org-agenda-mode-hook #'org-super-agenda-mode)
-  ;;(setq org-super-agenda-header-map (make-sparse-keymap))
 
   (setq org-agenda-start-on-weekday nil
         org-agenda-span 10
@@ -430,8 +444,7 @@ Taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/]]
 #+end_src
 **** Agenda Files
 
-
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
 (defun +org-notes-project-p ()
   "Return non-nil if current buffer has any todo entry.
 TODO entries marked as done are ignored, meaning the this
@@ -471,7 +484,7 @@ tasks."
 
 (defun +org-notes-project-files ()
   "Return a list of note files containing Project tag."
-  (seq-map
+   (seq-map
    #'car
    (org-roam-db-query
     [:select file
@@ -659,3 +672,26 @@ Setup agenda view to only show category icon
 (add-to-list 'auto-mode-alist '("\\.out$" . text-mode))
 #+end_src
 
+
+* Minor Modes
+** Company
+#+begin_src emacs-lisp :tangle yes
+(use-package! company
+  :defer t
+  :config
+  (setq company-minimum-prefix-length 1
+        company-show-numbers t))
+#+end_src
+** Projectile/Workspaces
+
+#+begin_src emacs-lisp :tangle yes
+(use-package! projectile
+  :defer t
+  :init
+  (defun mnie/switch-project ()
+    "Switch project and create new workspace."
+    (+workspaces-set-project-action-fn)
+    (+workspaces-switch-to-project-h))
+  :config
+  (setq projectile-switch-project-action #'mnie/switch-project))
+#+end_src

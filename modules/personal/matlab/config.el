@@ -6,6 +6,8 @@
   :init
   (setq matlab-return-add-semicolon t
 	matlab-quiesce-nosemi-regexp "\\s-*\\(function\\|parfor\\|for\\|spmd\\|while\\|try\\|catch\\|\ switch\\|otherwise\\|case\\|break\\|if\\|else\\|end\\|return\\|disp\\|\ $\\|%\\|methods\\|classdef\\|properties\\)")
+  (set-company-backend! 'matlab-mode
+    'company-capf 'company-file 'company-dabbrev-code 'company-keywords 'company-yasnippet)
   (add-hook 'matlab-mode-hook (defun mnie/run-prog-mode-hooks-h ()
 			       "Run prog-mode hooks"
 			       (run-hooks 'prog-mode-hook)))
@@ -91,3 +93,12 @@ Argument LIMIT is the maximum distance to search."
 	      (goto-char e2); move to end
 	      t
 	      ))))))
+
+
+;;;###autoload
+(defun +matlab-semicolon-at-eol ()
+    "Add semicolon at end of current line"
+    (interactive)
+    (save-excursion
+      (end-of-line)
+      (matlab-semicolon-on-return)))
